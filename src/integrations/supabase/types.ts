@@ -14,16 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      student_profiles: {
+        Row: {
+          created_at: string
+          grade_level: Database["public"]["Enums"]["grade_level"] | null
+          id: string
+          learning_goals: string | null
+          subjects: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          grade_level?: Database["public"]["Enums"]["grade_level"] | null
+          id?: string
+          learning_goals?: string | null
+          subjects?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          grade_level?: Database["public"]["Enums"]["grade_level"] | null
+          id?: string
+          learning_goals?: string | null
+          subjects?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tutor_profiles: {
+        Row: {
+          availability: string[] | null
+          bio: string | null
+          certification_urls: string[] | null
+          created_at: string
+          education_degree: string | null
+          education_university: string | null
+          graduation_year: number | null
+          hourly_rate: number | null
+          id: string
+          languages: string[] | null
+          rating: number | null
+          review_count: number | null
+          session_type: Database["public"]["Enums"]["session_type"] | null
+          status: Database["public"]["Enums"]["tutor_status"]
+          subjects: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string[] | null
+          bio?: string | null
+          certification_urls?: string[] | null
+          created_at?: string
+          education_degree?: string | null
+          education_university?: string | null
+          graduation_year?: number | null
+          hourly_rate?: number | null
+          id?: string
+          languages?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          session_type?: Database["public"]["Enums"]["session_type"] | null
+          status?: Database["public"]["Enums"]["tutor_status"]
+          subjects?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability?: string[] | null
+          bio?: string | null
+          certification_urls?: string[] | null
+          created_at?: string
+          education_degree?: string | null
+          education_university?: string | null
+          graduation_year?: number | null
+          hourly_rate?: number | null
+          id?: string
+          languages?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          session_type?: Database["public"]["Enums"]["session_type"] | null
+          status?: Database["public"]["Enums"]["tutor_status"]
+          subjects?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "tutor"
+      grade_level:
+        | "middle_school"
+        | "high_school"
+        | "university"
+        | "adult_learner"
+      session_type: "online" | "in_person" | "both"
+      tutor_status: "pending_approval" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +300,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "tutor"],
+      grade_level: [
+        "middle_school",
+        "high_school",
+        "university",
+        "adult_learner",
+      ],
+      session_type: ["online", "in_person", "both"],
+      tutor_status: ["pending_approval", "approved", "rejected"],
+    },
   },
 } as const
