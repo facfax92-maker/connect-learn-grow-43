@@ -68,7 +68,7 @@ const TutorDiscovery = () => {
       query = query.gte("rating", parseFloat(minRating));
     }
 
-    if (selectedSessionType) {
+    if (selectedSessionType && (selectedSessionType === "online" || selectedSessionType === "in_person" || selectedSessionType === "both")) {
       query = query.eq("session_type", selectedSessionType);
     }
 
