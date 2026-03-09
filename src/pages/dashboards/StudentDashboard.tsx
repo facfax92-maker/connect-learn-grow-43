@@ -591,13 +591,26 @@ const StudentDashboard = () => {
                               {s.status}
                             </Badge>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/tutors/${s.tutor_id}`)}
-                          >
-                            Book Again
-                          </Button>
+                          <div className="flex gap-2 shrink-0">
+                            {s.status === "completed" && !reviewedBookingIds.has(s.id) && (
+                              <Button
+                                size="sm"
+                                onClick={() => setReviewBooking(s)}
+                              >
+                                <Star className="h-3 w-3 mr-1" /> Leave Review
+                              </Button>
+                            )}
+                            {s.status === "completed" && reviewedBookingIds.has(s.id) && (
+                              <Badge variant="secondary" className="text-xs">Reviewed ✓</Badge>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/tutors/${s.tutor_id}`)}
+                            >
+                              Book Again
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))
