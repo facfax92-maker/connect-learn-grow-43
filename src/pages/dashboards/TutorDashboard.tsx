@@ -1,106 +1,37 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   LayoutDashboard,
   Calendar,
   Clock,
-  MessageCircle,
-  Star,
-  Settings,
-  Users,
   DollarSign,
-  Plus,
-  Trash2,
-  UserCheck,
-  Hourglass,
-  Copy,
-  Calculator,
+  Star,
+  User,
+  MessageCircle,
+  Settings,
 } from "lucide-react";
-import { format } from "date-fns";
+import TutorOverview from "@/components/tutor-dashboard/TutorOverview";
+import TutorBookings from "@/components/tutor-dashboard/TutorBookings";
+import TutorAvailability from "@/components/tutor-dashboard/TutorAvailability";
+import TutorEarnings from "@/components/tutor-dashboard/TutorEarnings";
+import TutorReviews from "@/components/tutor-dashboard/TutorReviews";
+import TutorProfileTab from "@/components/tutor-dashboard/TutorProfileTab";
+import TutorSettings from "@/components/tutor-dashboard/TutorSettings";
 import { useToast } from "@/hooks/use-toast";
-
-type Booking = {
-  id: string;
-  student_id: string;
-  date: string;
-  start_time: string;
-  duration: number;
-  subject: string;
-  status: string;
-  price: number;
-  student_name?: string;
-  student_avatar?: string | null;
-};
-
-type ReviewItem = {
-  id: string;
-  student_id: string;
-  rating: number;
-  comment: string | null;
-  created_at: string;
-  student_name?: string;
-  student_avatar?: string | null;
-};
-
-type AvailSlot = {
-  id: string;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-};
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "students", label: "My Students", icon: UserCheck },
-  { id: "sessions", label: "Sessions", icon: Calendar },
+  { id: "bookings", label: "Bookings", icon: Calendar },
   { id: "availability", label: "Availability", icon: Clock },
-  { id: "messages", label: "Messages", icon: MessageCircle },
+  { id: "earnings", label: "Earnings", icon: DollarSign },
   { id: "reviews", label: "Reviews", icon: Star },
+  { id: "profile", label: "Profile", icon: User },
+  { id: "messages", label: "Messages", icon: MessageCircle },
   { id: "settings", label: "Settings", icon: Settings },
 ];
-
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const HOUR_OPTIONS = Array.from({ length: 15 }, (_, i) => {
-  const h = i + 7;
-  return { value: `${h.toString().padStart(2, "0")}:00`, label: `${h % 12 || 12}:00 ${h >= 12 ? "PM" : "AM"}` };
-});
-
-const ALL_SUBJECTS = ["Math", "Science", "English", "History", "Coding", "Music", "Languages", "Test Prep"];
-
-const fmtTime = (t: string) => {
-  const h = parseInt(t.split(":")[0], 10);
-  return `${h % 12 || 12}:00 ${h >= 12 ? "PM" : "AM"}`;
-};
-
-const enrichBookingsWithStudents = async (bookings: any[]): Promise<Booking[]> => {
-  if (bookings.length === 0) return [];
-  const sids = [...new Set(bookings.map((b: any) => b.student_id))];
-  const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", sids);
-  const pm = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
-  return bookings.map((b: any) => ({
-    ...b,
-    student_name: pm.get(b.student_id)?.full_name || "Student",
-    student_avatar: pm.get(b.student_id)?.avatar_url,
-  }));
-};
 
 const TutorDashboard = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -108,36 +39,6 @@ const TutorDashboard = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [tutorProfile, setTutorProfile] = useState<any>(null);
-
-  // Sessions
-  const [upcoming, setUpcoming] = useState<Booking[]>([]);
-  const [past, setPast] = useState<Booking[]>([]);
-
-  // Availability
-  const [availSlots, setAvailSlots] = useState<AvailSlot[]>([]);
-  const [newDay, setNewDay] = useState("1");
-  const [newStart, setNewStart] = useState("09:00");
-  const [newEnd, setNewEnd] = useState("17:00");
-
-  // Reviews
-  const [reviews, setReviews] = useState<ReviewItem[]>([]);
-
-  // Settings
-  const [settingsName, setSettingsName] = useState("");
-  const [settingsBio, setSettingsBio] = useState("");
-  const [settingsRate, setSettingsRate] = useState("");
-  const [settingsSubjects, setSettingsSubjects] = useState<string[]>([]);
-  const [settingsSession, setSettingsSession] = useState("online");
-  const [saving, setSaving] = useState(false);
-
-  // Stats
-  const [totalStudents, setTotalStudents] = useState(0);
-  const [totalEarnings, setTotalEarnings] = useState(0);
-
-  // Connections (My Students)
-  const [connectedStudents, setConnectedStudents] = useState<any[]>([]);
-  const [pendingConnections, setPendingConnections] = useState<any[]>([]);
-  const [estimatorRate, setEstimatorRate] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -151,156 +52,33 @@ const TutorDashboard = () => {
       });
   }, [user]);
 
+  // Realtime: listen for new booking requests
   useEffect(() => {
-    if (!user || !tutorProfile) return;
-    if (activeTab === "overview" || activeTab === "sessions") fetchSessions();
-    if (activeTab === "availability") fetchAvailability();
-    if (activeTab === "reviews") fetchReviews();
-    if (activeTab === "settings") loadSettings();
+    if (!tutorProfile) return;
+    const channel = supabase
+      .channel("tutor-bookings-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "bookings",
+          filter: `tutor_id=eq.${tutorProfile.id}`,
+        },
+        (payload) => {
+          toast({
+            title: "📩 New Booking Request!",
+            description: `A student wants to book a ${payload.new.subject} session.`,
+          });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [tutorProfile, toast]);
+
+  useEffect(() => {
     if (activeTab === "messages") navigate("/messages");
-    if (activeTab === "students") fetchConnections();
-  }, [activeTab, user, tutorProfile]);
-
-  const fetchSessions = async () => {
-    if (!tutorProfile) return;
-    const today = format(new Date(), "yyyy-MM-dd");
-    const [{ data: u }, { data: p }] = await Promise.all([
-      supabase
-        .from("bookings")
-        .select("*")
-        .eq("tutor_id", tutorProfile.id)
-        .in("status", ["confirmed", "pending_payment"])
-        .gte("date", today)
-        .order("date", { ascending: true }),
-      supabase
-        .from("bookings")
-        .select("*")
-        .eq("tutor_id", tutorProfile.id)
-        .in("status", ["completed", "cancelled"])
-        .order("date", { ascending: false })
-        .limit(20),
-    ]);
-    setUpcoming(await enrichBookingsWithStudents(u || []));
-    setPast(await enrichBookingsWithStudents(p || []));
-    const completed = (p || []).filter((b) => b.status === "completed");
-    setTotalStudents(new Set((u || []).concat(completed).map((b) => b.student_id)).size);
-    setTotalEarnings(completed.reduce((s, b) => s + (b.price || 0), 0));
-  };
-
-  const fetchConnections = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from("tutor_student_connections")
-      .select("*")
-      .eq("tutor_user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (data && data.length > 0) {
-      const sids = [...new Set(data.map((c: any) => c.student_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, avatar_url, phone, email")
-        .in("user_id", sids);
-      const pm = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
-
-      const enriched = data.map((c: any) => ({
-        ...c,
-        student_name: pm.get(c.student_id)?.full_name || "Student",
-        student_avatar: pm.get(c.student_id)?.avatar_url,
-        student_phone: pm.get(c.student_id)?.phone,
-        student_email: pm.get(c.student_id)?.email,
-      }));
-
-      setConnectedStudents(enriched.filter((c: any) => c.status === "confirmed"));
-      setPendingConnections(enriched.filter((c: any) => ["pending", "payment_submitted"].includes(c.status)));
-    } else {
-      setConnectedStudents([]);
-      setPendingConnections([]);
-    }
-  };
-
-    if (!tutorProfile) return;
-    const { data } = await supabase
-      .from("tutor_availability")
-      .select("*")
-      .eq("tutor_id", tutorProfile.id)
-      .order("day_of_week", { ascending: true });
-    setAvailSlots((data as AvailSlot[]) || []);
-  };
-
-  const addAvailability = async () => {
-    if (!tutorProfile) return;
-    await supabase.from("tutor_availability").insert({
-      tutor_id: tutorProfile.id,
-      day_of_week: parseInt(newDay),
-      start_time: newStart,
-      end_time: newEnd,
-    });
-    toast({ title: "Availability added" });
-    fetchAvailability();
-  };
-
-  const removeAvailability = async (id: string) => {
-    await supabase.from("tutor_availability").delete().eq("id", id);
-    toast({ title: "Slot removed" });
-    fetchAvailability();
-  };
-
-  const fetchReviews = async () => {
-    if (!tutorProfile) return;
-    const { data } = await supabase
-      .from("reviews")
-      .select("*")
-      .eq("tutor_id", tutorProfile.id)
-      .order("created_at", { ascending: false });
-    if (data && data.length > 0) {
-      const sids = [...new Set(data.map((r: any) => r.student_id))];
-      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", sids);
-      const pm = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
-      setReviews(
-        data.map((r: any) => ({
-          ...r,
-          student_name: pm.get(r.student_id)?.full_name || "Student",
-          student_avatar: pm.get(r.student_id)?.avatar_url,
-        }))
-      );
-    } else {
-      setReviews([]);
-    }
-  };
-
-  const loadSettings = () => {
-    setSettingsName(profile?.full_name || "");
-    setSettingsBio(tutorProfile?.bio || "");
-    setSettingsRate(tutorProfile?.hourly_rate?.toString() || "");
-    setSettingsSubjects(tutorProfile?.subjects || []);
-    setSettingsSession(tutorProfile?.session_type || "online");
-  };
-
-  const saveSettings = async () => {
-    if (!user || !tutorProfile) return;
-    setSaving(true);
-    await supabase.from("profiles").update({ full_name: settingsName }).eq("user_id", user.id);
-    await supabase
-      .from("tutor_profiles")
-      .update({
-        bio: settingsBio || null,
-        hourly_rate: settingsRate ? parseFloat(settingsRate) : null,
-        subjects: settingsSubjects,
-        session_type: settingsSession as any,
-      })
-      .eq("id", tutorProfile.id);
-    await refreshProfile();
-    setTutorProfile({ ...tutorProfile, bio: settingsBio, hourly_rate: parseFloat(settingsRate), subjects: settingsSubjects, session_type: settingsSession });
-    setSaving(false);
-    toast({ title: "Settings saved!" });
-  };
-
-  const cancelBooking = async (id: string) => {
-    await supabase.from("bookings").update({ status: "cancelled" }).eq("id", id);
-    toast({ title: "Session cancelled" });
-    fetchSessions();
-  };
+  }, [activeTab, navigate]);
 
   if (!user) return null;
 
@@ -318,7 +96,9 @@ const TutorDashboard = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  active
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -330,15 +110,15 @@ const TutorDashboard = () => {
 
         {/* Mobile bottom nav */}
         <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-border bg-background">
-          <div className="flex">
-            {TABS.slice(0, 5).map((tab) => {
+          <div className="flex overflow-x-auto">
+            {TABS.slice(0, 6).map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
+                  className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors min-w-[60px] ${
                     active ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
@@ -352,458 +132,36 @@ const TutorDashboard = () => {
 
         {/* Main content */}
         <main className="flex-1 p-6 pb-24 md:pb-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
-          {/* OVERVIEW */}
           {activeTab === "overview" && (
-            <div className="max-w-4xl space-y-6">
-              <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/10 to-accent">
-                <h1 className="font-display text-2xl font-bold text-foreground">
-                  Welcome back, {profile?.full_name || "Tutor"}! 👋
-                </h1>
-                <p className="mt-1 text-muted-foreground text-sm">
-                  {tutorProfile?.status === "approved"
-                    ? "Your profile is live — students can find and book you."
-                    : "Your profile is pending approval."}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { label: "Upcoming", value: upcoming.length, icon: Calendar },
-                  { label: "Students", value: totalStudents, icon: Users },
-                  { label: "Earnings", value: `$${totalEarnings}`, icon: DollarSign },
-                  { label: "Rating", value: tutorProfile?.rating?.toFixed(1) || "—", icon: Star },
-                ].map((s) => (
-                  <Card key={s.label}>
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-accent">
-                        <s.icon className="h-5 w-5 text-accent-foreground" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                        <p className="text-xs text-muted-foreground">{s.label}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {upcoming.length > 0 && (
-                <Card>
-                  <CardHeader><CardTitle className="text-lg">Next Session</CardTitle></CardHeader>
-                  <CardContent>
-                    {(() => {
-                      const s = upcoming[0];
-                      return (
-                        <div className="flex items-center gap-4 flex-wrap">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={s.student_avatar || undefined} />
-                            <AvatarFallback className="bg-accent text-accent-foreground font-bold">
-                              {(s.student_name || "S")[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="font-semibold text-foreground">{s.student_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {s.subject} · {format(new Date(s.date), "EEE, MMM d")} at {fmtTime(s.start_time)}
-                            </p>
-                          </div>
-                          <Badge variant={s.status === "confirmed" ? "default" : "secondary"}>
-                            {s.status}
-                          </Badge>
-                        </div>
-                      );
-                    })()}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            <TutorOverview
+              user={user}
+              profile={profile}
+              tutorProfile={tutorProfile}
+            />
           )}
-
-          {/* MY STUDENTS */}
-          {activeTab === "students" && (
-            <div className="max-w-4xl space-y-6">
-              <h2 className="font-display text-xl font-bold text-foreground">My Students</h2>
-
-              <Tabs defaultValue="connected">
-                <TabsList>
-                  <TabsTrigger value="connected">Connected ({connectedStudents.length})</TabsTrigger>
-                  <TabsTrigger value="pending">Pending ({pendingConnections.length})</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="connected" className="space-y-3 mt-4">
-                  {connectedStudents.length === 0 ? (
-                    <Card><CardContent className="py-12 text-center">
-                      <UserCheck className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground">No connected students yet.</p>
-                    </CardContent></Card>
-                  ) : (
-                    connectedStudents.map((c: any) => (
-                      <Card key={c.id}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4 flex-wrap">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={c.student_avatar || undefined} />
-                              <AvatarFallback className="bg-accent text-accent-foreground text-sm">
-                                {(c.student_name || "S")[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-foreground">{c.student_name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {c.subject} · रू {c.monthly_rate?.toLocaleString()}/mo
-                                {c.confirmed_at && ` · Since ${format(new Date(c.confirmed_at), "MMM d, yyyy")}`}
-                              </p>
-                              <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
-                                {c.student_phone && <span>📞 {c.student_phone}</span>}
-                                {c.student_email && <span>📧 {c.student_email}</span>}
-                              </div>
-                            </div>
-                            <Button size="sm" variant="outline" onClick={() => navigate("/messages")}>
-                              <MessageCircle className="h-4 w-4 mr-1" /> Chat
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </TabsContent>
-
-                <TabsContent value="pending" className="space-y-3 mt-4">
-                  {pendingConnections.length === 0 ? (
-                    <Card><CardContent className="py-12 text-center">
-                      <Hourglass className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground">No pending agreements.</p>
-                    </CardContent></Card>
-                  ) : (
-                    pendingConnections.map((c: any) => {
-                      const expiresAt = new Date(c.expires_at);
-                      const hoursLeft = Math.max(0, Math.round((expiresAt.getTime() - Date.now()) / 3600000));
-                      return (
-                        <Card key={c.id}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-4 flex-wrap">
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-foreground">{c.student_name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {c.subject} · रू {c.monthly_rate?.toLocaleString()}/mo · Fee: रू {c.platform_fee?.toLocaleString()}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  <Clock className="h-3 w-3 inline mr-1" />
-                                  {hoursLeft > 0 ? `Expires in ${hoursLeft}h` : "Expired"}
-                                  {c.status === "payment_submitted" && " · 🕐 Awaiting admin review"}
-                                </p>
-                                {c.admin_note && (
-                                  <p className="text-xs text-destructive mt-1">⚠️ {c.admin_note}</p>
-                                )}
-                              </div>
-                              {c.status === "pending" && (
-                                <Button size="sm" onClick={() => navigate(`/connect/${c.id}`)}>
-                                  Pay & Unlock
-                                </Button>
-                              )}
-                              <Badge variant={c.status === "payment_submitted" ? "secondary" : "outline"} className="capitalize">
-                                {c.status.replace("_", " ")}
-                              </Badge>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })
-                  )}
-                </TabsContent>
-              </Tabs>
-
-              {/* Earnings Estimator */}
-              <Card>
-                <CardContent className="p-6 space-y-4">
-                  <h3 className="font-display text-base font-bold text-foreground flex items-center gap-2">
-                    <Calculator className="h-4 w-4" /> Earnings Estimator
-                  </h3>
-                  <div className="space-y-2">
-                    <label className="text-sm text-muted-foreground">Agreed monthly rate (रू)</label>
-                    <Input
-                      type="number"
-                      value={estimatorRate}
-                      onChange={e => setEstimatorRate(e.target.value)}
-                      placeholder="e.g. 2000"
-                    />
-                  </div>
-                  {parseInt(estimatorRate) > 0 && (
-                    <div className="space-y-2 p-3 rounded-lg bg-muted/40 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">One-time fee to platform</span>
-                        <span className="font-medium text-foreground">
-                          रू {(Math.round((parseInt(estimatorRate) * 0.25) / 10) * 10).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-bold">
-                        <span className="text-foreground">You keep every month</span>
-                        <span className="text-primary">रू {parseInt(estimatorRate).toLocaleString()} ✅</span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          {activeTab === "bookings" && tutorProfile && (
+            <TutorBookings tutorProfile={tutorProfile} />
           )}
-
-          {/* SESSIONS */}
-          {activeTab === "sessions" && (
-            <div className="max-w-4xl">
-              <h2 className="font-display text-xl font-bold mb-4 text-foreground">My Sessions</h2>
-              <Tabs defaultValue="upcoming">
-                <TabsList>
-                  <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
-                  <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
-                </TabsList>
-                <TabsContent value="upcoming" className="space-y-3 mt-4">
-                  {upcoming.length === 0 ? (
-                    <Card>
-                      <CardContent className="py-12 text-center">
-                        <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground">No upcoming sessions.</p>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    upcoming.map((s) => (
-                      <Card key={s.id}>
-                        <CardContent className="p-4 flex items-center gap-4 flex-wrap">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={s.student_avatar || undefined} />
-                            <AvatarFallback className="bg-accent text-accent-foreground text-sm">
-                              {(s.student_name || "S")[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground">{s.student_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {s.subject} · {format(new Date(s.date), "EEE, MMM d")} · {fmtTime(s.start_time)} · {s.duration}min
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline" onClick={() => cancelBooking(s.id)}>Cancel</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </TabsContent>
-                <TabsContent value="past" className="space-y-3 mt-4">
-                  {past.length === 0 ? (
-                    <Card>
-                      <CardContent className="py-12 text-center">
-                        <p className="text-muted-foreground">No past sessions yet.</p>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    past.map((s) => (
-                      <Card key={s.id}>
-                        <CardContent className="p-4 flex items-center gap-4 flex-wrap">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={s.student_avatar || undefined} />
-                            <AvatarFallback className="bg-accent text-accent-foreground text-sm">
-                              {(s.student_name || "S")[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground">{s.student_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {s.subject} · {format(new Date(s.date), "MMM d, yyyy")} · ${s.price}
-                            </p>
-                          </div>
-                          <Badge variant={s.status === "completed" ? "default" : "secondary"}>
-                            {s.status}
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </TabsContent>
-              </Tabs>
-            </div>
+          {activeTab === "availability" && tutorProfile && (
+            <TutorAvailability tutorProfile={tutorProfile} />
           )}
-
-          {/* AVAILABILITY */}
-          {activeTab === "availability" && (
-            <div className="max-w-2xl space-y-6">
-              <h2 className="font-display text-xl font-bold text-foreground">Manage Availability</h2>
-              <Card>
-                <CardHeader><CardTitle className="text-base">Add Time Slot</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground mb-1 block">Day</label>
-                      <Select value={newDay} onValueChange={setNewDay}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {DAY_NAMES.map((d, i) => (
-                            <SelectItem key={i} value={i.toString()}>{d}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground mb-1 block">Start</label>
-                      <Select value={newStart} onValueChange={setNewStart}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {HOUR_OPTIONS.map((h) => (
-                            <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground mb-1 block">End</label>
-                      <Select value={newEnd} onValueChange={setNewEnd}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {HOUR_OPTIONS.map((h) => (
-                            <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <Button onClick={addAvailability} className="gap-2">
-                    <Plus className="h-4 w-4" /> Add Slot
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader><CardTitle className="text-base">Current Schedule</CardTitle></CardHeader>
-                <CardContent>
-                  {availSlots.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">No availability set. Add your first time slot above.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {availSlots.map((slot) => (
-                        <div key={slot.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                          <div>
-                            <span className="font-medium text-foreground">{DAY_NAMES[slot.day_of_week]}</span>
-                            <span className="text-muted-foreground ml-2 text-sm">
-                              {fmtTime(slot.start_time)} – {fmtTime(slot.end_time)}
-                            </span>
-                          </div>
-                          <Button size="icon" variant="ghost" onClick={() => removeAvailability(slot.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          {activeTab === "earnings" && tutorProfile && (
+            <TutorEarnings tutorProfile={tutorProfile} />
           )}
-
-          {/* REVIEWS */}
-          {activeTab === "reviews" && (
-            <div className="max-w-3xl space-y-4">
-              <h2 className="font-display text-xl font-bold text-foreground">
-                Student Reviews ({reviews.length})
-              </h2>
-              {reviews.length === 0 ? (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <Star className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground">No reviews yet. They'll appear here once students rate your sessions.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                reviews.map((r) => (
-                  <Card key={r.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarImage src={r.student_avatar || undefined} />
-                          <AvatarFallback className="bg-muted text-xs">{(r.student_name || "S")[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-foreground text-sm">{r.student_name}</span>
-                            <span className="text-xs text-muted-foreground">{format(new Date(r.created_at), "MMM d, yyyy")}</span>
-                          </div>
-                          <div className="flex gap-0.5 mt-0.5">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                              <Star key={i} className={`h-3 w-3 ${i <= r.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />
-                            ))}
-                          </div>
-                          {r.comment && <p className="text-sm text-muted-foreground mt-2">{r.comment}</p>}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+          {activeTab === "reviews" && tutorProfile && (
+            <TutorReviews tutorProfile={tutorProfile} />
           )}
-
-          {/* SETTINGS */}
+          {activeTab === "profile" && tutorProfile && (
+            <TutorProfileTab
+              user={user}
+              profile={profile}
+              tutorProfile={tutorProfile}
+              setTutorProfile={setTutorProfile}
+              refreshProfile={refreshProfile}
+            />
+          )}
           {activeTab === "settings" && (
-            <div className="max-w-2xl space-y-6">
-              <h2 className="font-display text-xl font-bold text-foreground">Profile Settings</h2>
-              <Card>
-                <CardContent className="p-6 space-y-5">
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Full Name</label>
-                    <Input value={settingsName} onChange={(e) => setSettingsName(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Bio</label>
-                    <Textarea
-                      value={settingsBio}
-                      onChange={(e) => setSettingsBio(e.target.value)}
-                      rows={4}
-                      placeholder="Tell students about your teaching style..."
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Hourly Rate ($)</label>
-                    <Input
-                      type="number"
-                      value={settingsRate}
-                      onChange={(e) => setSettingsRate(e.target.value)}
-                      min={5}
-                      max={500}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Session Type</label>
-                    <Select value={settingsSession} onValueChange={setSettingsSession}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="online">Online</SelectItem>
-                        <SelectItem value="in_person">In-Person</SelectItem>
-                        <SelectItem value="both">Both</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Subjects</label>
-                    <div className="flex flex-wrap gap-2">
-                      {ALL_SUBJECTS.map((s) => (
-                        <label key={s} className="flex items-center gap-2 cursor-pointer">
-                          <Checkbox
-                            checked={settingsSubjects.includes(s)}
-                            onCheckedChange={(checked) => {
-                              setSettingsSubjects((prev) =>
-                                checked ? [...prev, s] : prev.filter((x) => x !== s)
-                              );
-                            }}
-                          />
-                          <span className="text-sm">{s}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <Button onClick={saveSettings} disabled={saving}>
-                    {saving ? "Saving..." : "Save Changes"}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+            <TutorSettings />
           )}
         </main>
       </div>
