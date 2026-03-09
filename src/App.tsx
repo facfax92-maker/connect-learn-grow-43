@@ -15,6 +15,8 @@ import TutorOnboarding from "./pages/onboarding/TutorOnboarding";
 import StudentDashboard from "./pages/dashboards/StudentDashboard";
 import TutorDashboard from "./pages/dashboards/TutorDashboard";
 import TutorDiscovery from "./pages/TutorDiscovery";
+import TutorProfile from "./pages/TutorProfile";
+import BookingFlow from "./pages/BookingFlow";
 
 const queryClient = new QueryClient();
 
