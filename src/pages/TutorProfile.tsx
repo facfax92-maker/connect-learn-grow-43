@@ -45,6 +45,10 @@ type ReviewWithProfile = {
   id: string;
   rating: number;
   comment: string | null;
+  tags: string[] | null;
+  tutor_reply: string | null;
+  reply_at: string | null;
+  flagged: boolean;
   created_at: string;
   student_id: string;
   reviewer_name: string | null;
