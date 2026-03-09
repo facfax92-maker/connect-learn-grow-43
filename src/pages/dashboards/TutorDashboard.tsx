@@ -419,6 +419,134 @@ const TutorDashboard = () => {
             </div>
           )}
 
+          {/* MY STUDENTS */}
+          {activeTab === "students" && (
+            <div className="max-w-4xl space-y-6">
+              <h2 className="font-display text-xl font-bold text-foreground">My Students</h2>
+
+              <Tabs defaultValue="connected">
+                <TabsList>
+                  <TabsTrigger value="connected">Connected ({connectedStudents.length})</TabsTrigger>
+                  <TabsTrigger value="pending">Pending ({pendingConnections.length})</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="connected" className="space-y-3 mt-4">
+                  {connectedStudents.length === 0 ? (
+                    <Card><CardContent className="py-12 text-center">
+                      <UserCheck className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No connected students yet.</p>
+                    </CardContent></Card>
+                  ) : (
+                    connectedStudents.map((c: any) => (
+                      <Card key={c.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={c.student_avatar || undefined} />
+                              <AvatarFallback className="bg-accent text-accent-foreground text-sm">
+                                {(c.student_name || "S")[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-foreground">{c.student_name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {c.subject} · रू {c.monthly_rate?.toLocaleString()}/mo
+                                {c.confirmed_at && ` · Since ${format(new Date(c.confirmed_at), "MMM d, yyyy")}`}
+                              </p>
+                              <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                                {c.student_phone && <span>📞 {c.student_phone}</span>}
+                                {c.student_email && <span>📧 {c.student_email}</span>}
+                              </div>
+                            </div>
+                            <Button size="sm" variant="outline" onClick={() => navigate("/messages")}>
+                              <MessageCircle className="h-4 w-4 mr-1" /> Chat
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </TabsContent>
+
+                <TabsContent value="pending" className="space-y-3 mt-4">
+                  {pendingConnections.length === 0 ? (
+                    <Card><CardContent className="py-12 text-center">
+                      <Hourglass className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No pending agreements.</p>
+                    </CardContent></Card>
+                  ) : (
+                    pendingConnections.map((c: any) => {
+                      const expiresAt = new Date(c.expires_at);
+                      const hoursLeft = Math.max(0, Math.round((expiresAt.getTime() - Date.now()) / 3600000));
+                      return (
+                        <Card key={c.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-foreground">{c.student_name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {c.subject} · रू {c.monthly_rate?.toLocaleString()}/mo · Fee: रू {c.platform_fee?.toLocaleString()}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  <Clock className="h-3 w-3 inline mr-1" />
+                                  {hoursLeft > 0 ? `Expires in ${hoursLeft}h` : "Expired"}
+                                  {c.status === "payment_submitted" && " · 🕐 Awaiting admin review"}
+                                </p>
+                                {c.admin_note && (
+                                  <p className="text-xs text-destructive mt-1">⚠️ {c.admin_note}</p>
+                                )}
+                              </div>
+                              {c.status === "pending" && (
+                                <Button size="sm" onClick={() => navigate(`/connect/${c.id}`)}>
+                                  Pay & Unlock
+                                </Button>
+                              )}
+                              <Badge variant={c.status === "payment_submitted" ? "secondary" : "outline"} className="capitalize">
+                                {c.status.replace("_", " ")}
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })
+                  )}
+                </TabsContent>
+              </Tabs>
+
+              {/* Earnings Estimator */}
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="font-display text-base font-bold text-foreground flex items-center gap-2">
+                    <Calculator className="h-4 w-4" /> Earnings Estimator
+                  </h3>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Agreed monthly rate (रू)</label>
+                    <Input
+                      type="number"
+                      value={estimatorRate}
+                      onChange={e => setEstimatorRate(e.target.value)}
+                      placeholder="e.g. 2000"
+                    />
+                  </div>
+                  {parseInt(estimatorRate) > 0 && (
+                    <div className="space-y-2 p-3 rounded-lg bg-muted/40 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">One-time fee to platform</span>
+                        <span className="font-medium text-foreground">
+                          रू {(Math.round((parseInt(estimatorRate) * 0.25) / 10) * 10).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between font-bold">
+                        <span className="text-foreground">You keep every month</span>
+                        <span className="text-primary">रू {parseInt(estimatorRate).toLocaleString()} ✅</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* SESSIONS */}
           {activeTab === "sessions" && (
             <div className="max-w-4xl">
