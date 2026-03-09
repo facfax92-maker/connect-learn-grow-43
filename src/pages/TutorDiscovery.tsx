@@ -338,7 +338,7 @@ const TutorDiscovery = () => {
                 const bioSnippet = tutor.bio ? (tutor.bio.length > 80 ? tutor.bio.slice(0, 80) + "…" : tutor.bio) : "";
 
                 return (
-                  <Card key={tutor.id} className="group overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                  <Card key={tutor.id} className="group overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/tutors/${tutor.id}`)}>
                     <CardContent className="p-5 space-y-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
