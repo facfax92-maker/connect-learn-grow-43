@@ -2,12 +2,12 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 
 const tutors = [
-  { name: "Sita Sharma", subject: "SEE Mathematics", rating: 4.9, rate: 1500 },
-  { name: "Rajesh Adhikari", subject: "NEB Physics", rating: 5.0, rate: 2000 },
-  { name: "Anita Gurung", subject: "English Communication", rating: 4.8, rate: 1200 },
-  { name: "Bikash Thapa", subject: "IOE Entrance Prep", rating: 4.9, rate: 2500 },
-  { name: "Priya Joshi", subject: "NEB Chemistry", rating: 4.7, rate: 1800 },
-  { name: "Manish Shrestha", subject: "Loksewa Preparation", rating: 5.0, rate: 2000 },
+  { name: "Sita Sharma", subject: "SEE Mathematics", rating: 4.9 },
+  { name: "Rajesh Adhikari", subject: "NEB Physics", rating: 5.0 },
+  { name: "Anita Gurung", subject: "English Communication", rating: 4.8 },
+  { name: "Bikash Thapa", subject: "IOE Entrance Prep", rating: 4.9 },
+  { name: "Priya Joshi", subject: "NEB Chemistry", rating: 4.7 },
+  { name: "Manish Shrestha", subject: "Loksewa Preparation", rating: 5.0 },
 ];
 
 const FeaturedTutors = () => (
