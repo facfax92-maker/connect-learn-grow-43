@@ -952,6 +952,22 @@ const StudentDashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Review Modal */}
+      {reviewBooking && (
+        <ReviewModal
+          open={!!reviewBooking}
+          onClose={() => setReviewBooking(null)}
+          bookingId={reviewBooking.id}
+          tutorId={reviewBooking.tutor_id}
+          tutorName={reviewBooking.tutor_name || "Tutor"}
+          tutorAvatar={reviewBooking.tutor_avatar}
+          onSubmitted={() => {
+            setReviewedBookingIds((prev) => new Set([...prev, reviewBooking.id]));
+            fetchReviews();
+          }}
+        />
+      )}
     </div>
   );
 };
