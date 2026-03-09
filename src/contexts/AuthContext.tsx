@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 type Profile = {
   id: string;
   user_id: string;
-  role: "student" | "tutor" | null;
+  role: "student" | "tutor" | "admin" | null;
   full_name: string | null;
   avatar_url: string | null;
 };

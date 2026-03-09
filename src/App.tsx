@@ -15,6 +15,7 @@ import TutorOnboarding from "./pages/onboarding/TutorOnboarding";
 import StudentDashboard from "./pages/dashboards/StudentDashboard";
 import TutorDashboard from "./pages/dashboards/TutorDashboard";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
+import AdminPanel from "./pages/AdminPanel";
 import TutorDiscovery from "./pages/TutorDiscovery";
 import TutorProfile from "./pages/TutorProfile";
 import BookingFlow from "./pages/BookingFlow";
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/tutor/dashboard" element={<TutorDashboard />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin" element={<AdminPanel />} />
             <Route path="/tutors" element={<TutorDiscovery />} />
             <Route path="/tutors/:id" element={<TutorProfile />} />
             <Route path="/book/:tutorId" element={<BookingFlow />} />
