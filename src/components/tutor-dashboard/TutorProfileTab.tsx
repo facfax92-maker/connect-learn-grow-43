@@ -148,8 +148,8 @@ const TutorProfileTab = ({ user, profile, tutorProfile, setTutorProfile, refresh
                 type="number"
                 value={rate}
                 onChange={(e) => setRate(e.target.value)}
-                min={100}
-                max={10000}
+                min={PRICE_RANGE.min}
+                max={PRICE_RANGE.max}
               />
             </div>
             <div>

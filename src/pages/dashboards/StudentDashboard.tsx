@@ -646,7 +646,7 @@ const StudentDashboard = () => {
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                               <span>{t.rating || "New"}</span>
-                              <span>· ${t.hourly_rate}/hr</span>
+                              <span>· रू {t.hourly_rate?.toLocaleString()}/session</span>
                             </div>
                           </div>
                         </div>
