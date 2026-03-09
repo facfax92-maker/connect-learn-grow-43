@@ -564,7 +564,7 @@ const BookingFlow = () => {
                 ))}
                 <div className="border-t border-border pt-3 flex justify-between font-bold text-base">
                   <span className="text-foreground">Total</span>
-                  <span className="text-foreground">${price.toFixed(2)}</span>
+                  <span className="text-foreground">रू {price.toLocaleString()}</span>
                 </div>
               </div>
 

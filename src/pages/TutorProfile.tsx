@@ -376,7 +376,7 @@ const TutorProfile = () => {
                   </div>
                   {tutor.certification_urls && tutor.certification_urls.length > 0 && (
                     <div className="mt-4">
-                      <p className="text-sm font-medium mb-2 text-muted-foreground">Certifications</p>
+                      <p className="text-sm font-medium mb-2 text-muted-foreground">Uploaded Documents</p>
                       <div className="flex flex-wrap gap-2">
                         {tutor.certification_urls.map((url, i) => (
                           <a key={i} href={url} target="_blank" rel="noopener noreferrer">
