@@ -178,7 +178,7 @@ const Messages = () => {
     fetchConversations();
   }, [user]);
 
-  // Fetch messages for active conversation + realtime
+  // Fetch messages for active conversation + realtime + connection check
   useEffect(() => {
     if (!activeConvoId || !user) return;
 
@@ -188,7 +188,11 @@ const Messages = () => {
         .select("*")
         .eq("conversation_id", activeConvoId)
         .order("created_at", { ascending: true });
-      if (data) setMessages(data as Message[]);
+      if (data) {
+        setMessages(data as Message[]);
+        // Check message limit for unconnected pairs
+        checkMessageLimit(activeConvoId, data?.length || 0);
+      }
 
       // Mark as read
       await supabase
