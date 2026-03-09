@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          date: string
+          duration: number
+          id: string
+          note: string | null
+          price: number
+          start_time: string
+          status: Database["public"]["Enums"]["booking_status"]
+          stripe_payment_id: string | null
+          student_id: string
+          subject: string
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          duration: number
+          id?: string
+          note?: string | null
+          price: number
+          start_time: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          stripe_payment_id?: string | null
+          student_id: string
+          subject: string
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration?: number
+          id?: string
+          note?: string | null
+          price?: number
+          start_time?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          stripe_payment_id?: string | null
+          student_id?: string
+          subject?: string
+          tutor_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -44,6 +92,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          student_id: string
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          student_id: string
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          student_id?: string
+          tutor_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       student_profiles: {
         Row: {
           created_at: string
@@ -71,6 +149,36 @@ export type Database = {
           subjects?: string[] | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      tutor_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          start_time: string
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          start_time: string
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          start_time?: string
+          tutor_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -167,6 +275,11 @@ export type Database = {
     }
     Enums: {
       app_role: "student" | "tutor"
+      booking_status:
+        | "pending_payment"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
       grade_level:
         | "middle_school"
         | "high_school"
@@ -302,6 +415,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "tutor"],
+      booking_status: [
+        "pending_payment",
+        "confirmed",
+        "completed",
+        "cancelled",
+      ],
       grade_level: [
         "middle_school",
         "high_school",
