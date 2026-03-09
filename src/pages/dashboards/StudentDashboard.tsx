@@ -40,7 +40,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-
+import ReviewModal from "@/components/ReviewModal";
 type Booking = {
   id: string;
   tutor_id: string;
