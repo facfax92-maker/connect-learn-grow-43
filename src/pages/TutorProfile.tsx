@@ -628,7 +628,18 @@ const TutorProfile = () => {
                     {selectedSlot ? "Book This Session" : "Book a Session"}
                   </Button>
 
-                  <Button variant="outline" className="w-full gap-2">
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    onClick={async () => {
+                      if (!user) { navigate("/login"); return; }
+                      const { data: convId } = await supabase.rpc(
+                        "get_or_create_conversation" as any,
+                        { p_student_id: user.id, p_tutor_id: tutor.user_id }
+                      );
+                      if (convId) navigate(`/messages?conversation=${convId}`);
+                    }}
+                  >
                     <MessageCircle className="h-4 w-4" />
                     Message Tutor
                   </Button>
