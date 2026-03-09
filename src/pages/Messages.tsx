@@ -259,9 +259,54 @@ const Messages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const checkMessageLimit = async (convoId: string, msgCount: number) => {
+    if (!user) return;
+    // Get conversation details
+    const { data: convo } = await supabase
+      .from("conversations")
+      .select("student_id, tutor_id")
+      .eq("id", convoId)
+      .single();
+    if (!convo) return;
+
+    // Check if there's a confirmed connection
+    const { data: conn } = await supabase
+      .from("tutor_student_connections")
+      .select("status")
+      .or(`and(tutor_user_id.eq.${user.id},student_id.eq.${convo.student_id}),and(student_id.eq.${user.id})`)
+      .in("status", ["confirmed", "payment_submitted", "pending"])
+      .limit(1);
+
+    // Also check using tutor_profile lookup
+    const { data: tp } = await supabase
+      .from("tutor_profiles")
+      .select("user_id")
+      .eq("id", convo.tutor_id)
+      .single();
+
+    let isConnected = false;
+    if (tp) {
+      const { data: directConn } = await supabase
+        .from("tutor_student_connections")
+        .select("status")
+        .eq("tutor_user_id", tp.user_id)
+        .eq("student_id", convo.student_id)
+        .eq("status", "confirmed")
+        .single();
+      isConnected = !!directConn;
+    }
+
+    setConnectionStatus(prev => ({
+      ...prev,
+      [convoId]: isConnected ? "connected" : "not_connected"
+    }));
+    setMessageLimitReached(!isConnected && msgCount >= 10);
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() || !activeConvoId || !user || sending) return;
     if (newMessage.length > 2000) return;
+    if (messageLimitReached) return;
     setSending(true);
     const content = newMessage.trim();
     setNewMessage("");
