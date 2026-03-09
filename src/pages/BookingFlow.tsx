@@ -341,7 +341,7 @@ const BookingFlow = () => {
         </Avatar>
         <div>
           <p className="font-semibold text-foreground">{state.tutorName || "Your Tutor"}</p>
-          <p className="text-sm text-muted-foreground">${state.hourlyRate}/hr</p>
+          <p className="text-sm text-muted-foreground">रू {state.hourlyRate?.toLocaleString()}/session</p>
         </div>
       </CardContent>
     </Card>
