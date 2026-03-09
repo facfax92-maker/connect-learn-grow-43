@@ -42,7 +42,7 @@ const FeaturedTutors = () => (
               <Star className="text-primary fill-primary" size={14} />
               <span className="font-medium">{tutor.rating}</span>
             </div>
-            <p className="mt-3 text-lg font-bold text-primary">रू {tutor.rate.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/session</span></p>
+            
           </motion.div>
         ))}
       </div>
