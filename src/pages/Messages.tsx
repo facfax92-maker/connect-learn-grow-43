@@ -59,6 +59,8 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [connectionStatus, setConnectionStatus] = useState<Record<string, string>>({});
+  const [messageLimitReached, setMessageLimitReached] = useState(false);
 
   useEffect(() => {
     if (!user) navigate("/login");
@@ -176,7 +178,7 @@ const Messages = () => {
     fetchConversations();
   }, [user]);
 
-  // Fetch messages for active conversation + realtime
+  // Fetch messages for active conversation + realtime + connection check
   useEffect(() => {
     if (!activeConvoId || !user) return;
 
@@ -186,7 +188,11 @@ const Messages = () => {
         .select("*")
         .eq("conversation_id", activeConvoId)
         .order("created_at", { ascending: true });
-      if (data) setMessages(data as Message[]);
+      if (data) {
+        setMessages(data as Message[]);
+        // Check message limit for unconnected pairs
+        checkMessageLimit(activeConvoId, data?.length || 0);
+      }
 
       // Mark as read
       await supabase
@@ -253,9 +259,54 @@ const Messages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const checkMessageLimit = async (convoId: string, msgCount: number) => {
+    if (!user) return;
+    // Get conversation details
+    const { data: convo } = await supabase
+      .from("conversations")
+      .select("student_id, tutor_id")
+      .eq("id", convoId)
+      .single();
+    if (!convo) return;
+
+    // Check if there's a confirmed connection
+    const { data: conn } = await supabase
+      .from("tutor_student_connections")
+      .select("status")
+      .or(`and(tutor_user_id.eq.${user.id},student_id.eq.${convo.student_id}),and(student_id.eq.${user.id})`)
+      .in("status", ["confirmed", "payment_submitted", "pending"])
+      .limit(1);
+
+    // Also check using tutor_profile lookup
+    const { data: tp } = await supabase
+      .from("tutor_profiles")
+      .select("user_id")
+      .eq("id", convo.tutor_id)
+      .single();
+
+    let isConnected = false;
+    if (tp) {
+      const { data: directConn } = await supabase
+        .from("tutor_student_connections")
+        .select("status")
+        .eq("tutor_user_id", tp.user_id)
+        .eq("student_id", convo.student_id)
+        .eq("status", "confirmed")
+        .single();
+      isConnected = !!directConn;
+    }
+
+    setConnectionStatus(prev => ({
+      ...prev,
+      [convoId]: isConnected ? "connected" : "not_connected"
+    }));
+    setMessageLimitReached(!isConnected && msgCount >= 10);
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() || !activeConvoId || !user || sending) return;
     if (newMessage.length > 2000) return;
+    if (messageLimitReached) return;
     setSending(true);
     const content = newMessage.trim();
     setNewMessage("");
@@ -573,50 +624,72 @@ const Messages = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
-              <div className="px-4 py-3 border-t border-border shrink-0">
-                <div className="flex items-end gap-2">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*,.pdf,.doc,.docx"
-                    onChange={handleFileUpload}
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0 mb-0.5"
-                  >
-                    <Paperclip className="h-5 w-5 text-muted-foreground" />
-                  </button>
-                  <div className="flex-1 relative">
-                    <textarea
-                      value={newMessage}
-                      onChange={(e) =>
-                        setNewMessage(e.target.value.slice(0, 2000))
-                      }
-                      onKeyDown={handleKeyDown}
-                      placeholder="Type a message..."
-                      rows={1}
-                      className="w-full resize-none rounded-xl border border-input bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring max-h-32"
-                      style={{ minHeight: "40px" }}
-                    />
-                    {newMessage.length > 1900 && (
-                      <span className="absolute bottom-1 right-2 text-[10px] text-muted-foreground">
-                        {newMessage.length}/2000
-                      </span>
-                    )}
+              {/* Message limit banner */}
+              {messageLimitReached && (
+                <div className="px-4 py-3 bg-accent/50 border-t border-border">
+                  <div className="text-center space-y-2">
+                    <p className="text-sm font-medium text-foreground">
+                      🔒 Message limit reached (10 messages)
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Pay the one-time finder's fee to unlock unlimited messaging and contact details.
+                    </p>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/connect/${activeConvoId}`)}
+                    >
+                      Unlock Connection
+                    </Button>
                   </div>
-                  <Button
-                    size="icon"
-                    className="rounded-xl h-10 w-10 shrink-0 mb-0.5"
-                    disabled={!newMessage.trim() || sending}
-                    onClick={sendMessage}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
                 </div>
-              </div>
+              )}
+
+              {/* Input */}
+              {!messageLimitReached && (
+                <div className="px-4 py-3 border-t border-border shrink-0">
+                  <div className="flex items-end gap-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*,.pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0 mb-0.5"
+                    >
+                      <Paperclip className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                    <div className="flex-1 relative">
+                      <textarea
+                        value={newMessage}
+                        onChange={(e) =>
+                          setNewMessage(e.target.value.slice(0, 2000))
+                        }
+                        onKeyDown={handleKeyDown}
+                        placeholder="Type a message..."
+                        rows={1}
+                        className="w-full resize-none rounded-xl border border-input bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring max-h-32"
+                        style={{ minHeight: "40px" }}
+                      />
+                      {newMessage.length > 1900 && (
+                        <span className="absolute bottom-1 right-2 text-[10px] text-muted-foreground">
+                          {newMessage.length}/2000
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      size="icon"
+                      className="rounded-xl h-10 w-10 shrink-0 mb-0.5"
+                      disabled={!newMessage.trim() || sending}
+                      onClick={sendMessage}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-8">

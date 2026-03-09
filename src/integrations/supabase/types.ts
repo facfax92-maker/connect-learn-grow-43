@@ -154,12 +154,32 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
+          phone: string | null
           role: Database["public"]["Enums"]["app_role"] | null
           updated_at: string
           user_id: string
@@ -167,8 +187,10 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          phone?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string
           user_id: string
@@ -176,8 +198,10 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          phone?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string
           user_id?: string
@@ -331,6 +355,54 @@ export type Database = {
           subjects?: string[] | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      tutor_student_connections: {
+        Row: {
+          admin_note: string | null
+          confirmed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          monthly_rate: number
+          payment_screenshot_url: string | null
+          platform_fee: number
+          status: string
+          student_id: string
+          subject: string
+          tutor_profile_id: string
+          tutor_user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          monthly_rate: number
+          payment_screenshot_url?: string | null
+          platform_fee: number
+          status?: string
+          student_id: string
+          subject?: string
+          tutor_profile_id: string
+          tutor_user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          monthly_rate?: number
+          payment_screenshot_url?: string | null
+          platform_fee?: number
+          status?: string
+          student_id?: string
+          subject?: string
+          tutor_profile_id?: string
+          tutor_user_id?: string
         }
         Relationships: []
       }

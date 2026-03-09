@@ -14,10 +14,12 @@ import StudentOnboarding from "./pages/onboarding/StudentOnboarding";
 import TutorOnboarding from "./pages/onboarding/TutorOnboarding";
 import StudentDashboard from "./pages/dashboards/StudentDashboard";
 import TutorDashboard from "./pages/dashboards/TutorDashboard";
+import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import TutorDiscovery from "./pages/TutorDiscovery";
 import TutorProfile from "./pages/TutorProfile";
 import BookingFlow from "./pages/BookingFlow";
 import Messages from "./pages/Messages";
+import ConnectionAgreement from "./pages/ConnectionAgreement";
 
 const queryClient = new QueryClient();
 
@@ -38,10 +40,12 @@ const App = () => (
             <Route path="/onboarding/tutor" element={<TutorOnboarding />} />
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/tutor/dashboard" element={<TutorDashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/tutors" element={<TutorDiscovery />} />
             <Route path="/tutors/:id" element={<TutorProfile />} />
             <Route path="/book/:tutorId" element={<BookingFlow />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/connect/:conversationId" element={<ConnectionAgreement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
