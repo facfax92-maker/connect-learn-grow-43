@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { User, Upload, BookOpen, GraduationCap, DollarSign, FileCheck, ArrowRight, ArrowLeft } from "lucide-react";
+import { User, Upload, BookOpen, GraduationCap, Wallet, FileCheck, ArrowRight, ArrowLeft } from "lucide-react";
+import { NEPAL_SUBJECTS, NEPAL_CITIES, ENTRANCE_EXAMS, PRICE_RANGE, formatNPR } from "@/lib/constants";
 
-const SUBJECTS = ["Math", "Science", "English", "History", "Coding", "Music", "Languages", "Test Prep"];
 const SESSION_TYPES = [
   { value: "online", label: "Online" },
   { value: "in_person", label: "In-Person" },
@@ -29,8 +30,10 @@ const TutorOnboarding = () => {
   const [degree, setDegree] = useState("");
   const [university, setUniversity] = useState("");
   const [gradYear, setGradYear] = useState("");
-  const [hourlyRate, setHourlyRate] = useState([50]);
+  const [hourlyRate, setHourlyRate] = useState([1000]);
   const [sessionType, setSessionType] = useState<string>("online");
+  const [teachingCity, setTeachingCity] = useState("");
+  const [entranceSpecializations, setEntranceSpecializations] = useState<string[]>([]);
   const [certFiles, setCertFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const { user, refreshProfile } = useAuth();
@@ -57,6 +60,12 @@ const TutorOnboarding = () => {
     );
   };
 
+  const toggleEntrance = (exam: string) => {
+    setEntranceSpecializations((prev) =>
+      prev.includes(exam) ? prev.filter((e) => e !== exam) : [...prev, exam]
+    );
+  };
+
   const handleComplete = async () => {
     if (!user) return;
     setLoading(true);
@@ -72,7 +81,6 @@ const TutorOnboarding = () => {
       }
     }
 
-    // Upload certifications
     const certUrls: string[] = [];
     for (const file of certFiles) {
       const path = `${user.id}/${Date.now()}-${file.name}`;
@@ -82,13 +90,12 @@ const TutorOnboarding = () => {
       }
     }
 
-    // Update profile
     await supabase.from("profiles").update({
       full_name: fullName,
       avatar_url: avatarUrl,
+      city: teachingCity || null,
     }).eq("user_id", user.id);
 
-    // Insert tutor profile
     await supabase.from("tutor_profiles").insert({
       user_id: user.id,
       bio,
@@ -99,6 +106,8 @@ const TutorOnboarding = () => {
       education_university: university,
       graduation_year: gradYear ? parseInt(gradYear) : null,
       certification_urls: certUrls,
+      teaching_city: teachingCity || null,
+      entrance_specializations: entranceSpecializations,
     });
 
     await refreshProfile();
@@ -111,8 +120,8 @@ const TutorOnboarding = () => {
     { icon: User, label: "Profile" },
     { icon: BookOpen, label: "Subjects" },
     { icon: GraduationCap, label: "Education" },
-    { icon: DollarSign, label: "Rate" },
-    { icon: FileCheck, label: "Certs" },
+    { icon: Wallet, label: "Rate" },
+    { icon: FileCheck, label: "ID & Docs" },
   ];
 
   return (
@@ -147,7 +156,7 @@ const TutorOnboarding = () => {
                 </CardHeader>
                 <div className="space-y-2">
                   <Label>Full Name</Label>
-                  <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Jane Smith" />
+                  <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Sita Sharma" />
                 </div>
                 <div className="space-y-2">
                   <Label>Profile Photo</Label>
@@ -176,6 +185,17 @@ const TutorOnboarding = () => {
                     rows={3}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>Teaching City / District</Label>
+                  <Select value={teachingCity} onValueChange={setTeachingCity}>
+                    <SelectTrigger><SelectValue placeholder="Select city" /></SelectTrigger>
+                    <SelectContent>
+                      {NEPAL_CITIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </>
             )}
 
@@ -186,16 +206,31 @@ const TutorOnboarding = () => {
                   <CardDescription>Select all that apply</CardDescription>
                 </CardHeader>
                 <div className="flex flex-wrap gap-2">
-                  {SUBJECTS.map((sub) => (
+                  {NEPAL_SUBJECTS.map((sub) => (
                     <Badge
                       key={sub}
                       variant={subjects.includes(sub) ? "default" : "outline"}
-                      className="cursor-pointer text-sm px-4 py-2"
+                      className="cursor-pointer text-sm px-3 py-1.5"
                       onClick={() => toggleSubject(sub)}
                     >
                       {sub}
                     </Badge>
                   ))}
+                </div>
+                <div className="space-y-2 pt-3">
+                  <Label>Entrance Exam Specialization (optional)</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {ENTRANCE_EXAMS.filter(e => e !== "None").map((exam) => (
+                      <Badge
+                        key={exam}
+                        variant={entranceSpecializations.includes(exam) ? "default" : "outline"}
+                        className="cursor-pointer text-sm px-3 py-1.5"
+                        onClick={() => toggleEntrance(exam)}
+                      >
+                        {exam}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </>
             )}
@@ -208,11 +243,11 @@ const TutorOnboarding = () => {
                 </CardHeader>
                 <div className="space-y-2">
                   <Label>Degree</Label>
-                  <Input value={degree} onChange={(e) => setDegree(e.target.value)} placeholder="B.Sc. Computer Science" />
+                  <Input value={degree} onChange={(e) => setDegree(e.target.value)} placeholder="B.Sc. in Physics" />
                 </div>
                 <div className="space-y-2">
-                  <Label>University</Label>
-                  <Input value={university} onChange={(e) => setUniversity(e.target.value)} placeholder="MIT" />
+                  <Label>University / College</Label>
+                  <Input value={university} onChange={(e) => setUniversity(e.target.value)} placeholder="Tribhuvan University" />
                 </div>
                 <div className="space-y-2">
                   <Label>Graduation Year</Label>
@@ -229,16 +264,16 @@ const TutorOnboarding = () => {
                 </CardHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Hourly Rate: ${hourlyRate[0]}/hr</Label>
+                    <Label>Per Session Rate: {formatNPR(hourlyRate[0])}</Label>
                     <Slider
                       value={hourlyRate}
                       onValueChange={setHourlyRate}
-                      min={10}
-                      max={200}
-                      step={5}
+                      min={PRICE_RANGE.min}
+                      max={PRICE_RANGE.max}
+                      step={100}
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>$10</span><span>$200</span>
+                      <span>{formatNPR(PRICE_RANGE.min)}</span><span>{formatNPR(PRICE_RANGE.max)}</span>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -262,8 +297,8 @@ const TutorOnboarding = () => {
             {step === 5 && (
               <>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-lg">Certifications</CardTitle>
-                  <CardDescription>Upload any relevant certifications or ID (optional)</CardDescription>
+                  <CardTitle className="text-lg">Upload Citizenship or ID</CardTitle>
+                  <CardDescription>Upload your citizenship card, national ID, or relevant documents for verification</CardDescription>
                 </CardHeader>
                 <label className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 cursor-pointer hover:border-primary/50 transition-colors">
                   <Upload className="h-8 w-8 text-muted-foreground mb-2" />

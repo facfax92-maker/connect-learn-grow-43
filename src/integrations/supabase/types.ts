@@ -175,6 +175,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          city: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -186,6 +187,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -197,6 +199,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -288,27 +291,39 @@ export type Database = {
       student_profiles: {
         Row: {
           created_at: string
+          district: string | null
+          entrance_exam_target: string | null
           grade_level: Database["public"]["Enums"]["grade_level"] | null
           id: string
           learning_goals: string | null
+          parent_contact: string | null
+          school_name: string | null
           subjects: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          district?: string | null
+          entrance_exam_target?: string | null
           grade_level?: Database["public"]["Enums"]["grade_level"] | null
           id?: string
           learning_goals?: string | null
+          parent_contact?: string | null
+          school_name?: string | null
           subjects?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          district?: string | null
+          entrance_exam_target?: string | null
           grade_level?: Database["public"]["Enums"]["grade_level"] | null
           id?: string
           learning_goals?: string | null
+          parent_contact?: string | null
+          school_name?: string | null
           subjects?: string[] | null
           updated_at?: string
           user_id?: string
@@ -353,6 +368,7 @@ export type Database = {
           created_at: string
           education_degree: string | null
           education_university: string | null
+          entrance_specializations: string[] | null
           graduation_year: number | null
           hourly_rate: number | null
           id: string
@@ -362,6 +378,7 @@ export type Database = {
           session_type: Database["public"]["Enums"]["session_type"] | null
           status: Database["public"]["Enums"]["tutor_status"]
           subjects: string[] | null
+          teaching_city: string | null
           updated_at: string
           user_id: string
         }
@@ -372,6 +389,7 @@ export type Database = {
           created_at?: string
           education_degree?: string | null
           education_university?: string | null
+          entrance_specializations?: string[] | null
           graduation_year?: number | null
           hourly_rate?: number | null
           id?: string
@@ -381,6 +399,7 @@ export type Database = {
           session_type?: Database["public"]["Enums"]["session_type"] | null
           status?: Database["public"]["Enums"]["tutor_status"]
           subjects?: string[] | null
+          teaching_city?: string | null
           updated_at?: string
           user_id: string
         }
@@ -391,6 +410,7 @@ export type Database = {
           created_at?: string
           education_degree?: string | null
           education_university?: string | null
+          entrance_specializations?: string[] | null
           graduation_year?: number | null
           hourly_rate?: number | null
           id?: string
@@ -400,6 +420,7 @@ export type Database = {
           session_type?: Database["public"]["Enums"]["session_type"] | null
           status?: Database["public"]["Enums"]["tutor_status"]
           subjects?: string[] | null
+          teaching_city?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -507,6 +528,14 @@ export type Database = {
         | "high_school"
         | "university"
         | "adult_learner"
+        | "grade_1_8"
+        | "grade_9_10_see"
+        | "grade_11_12_science"
+        | "grade_11_12_management"
+        | "grade_11_12_humanities"
+        | "bachelors"
+        | "masters"
+        | "entrance_exam_prep"
       session_type: "online" | "in_person" | "both"
       tutor_status: "pending_approval" | "approved" | "rejected"
     }
@@ -648,6 +677,14 @@ export const Constants = {
         "high_school",
         "university",
         "adult_learner",
+        "grade_1_8",
+        "grade_9_10_see",
+        "grade_11_12_science",
+        "grade_11_12_management",
+        "grade_11_12_humanities",
+        "bachelors",
+        "masters",
+        "entrance_exam_prep",
       ],
       session_type: ["online", "in_person", "both"],
       tutor_status: ["pending_approval", "approved", "rejected"],

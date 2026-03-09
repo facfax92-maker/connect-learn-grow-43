@@ -376,7 +376,7 @@ const TutorProfile = () => {
                   </div>
                   {tutor.certification_urls && tutor.certification_urls.length > 0 && (
                     <div className="mt-4">
-                      <p className="text-sm font-medium mb-2 text-muted-foreground">Certifications</p>
+                      <p className="text-sm font-medium mb-2 text-muted-foreground">Uploaded Documents</p>
                       <div className="flex flex-wrap gap-2">
                         {tutor.certification_urls.map((url, i) => (
                           <a key={i} href={url} target="_blank" rel="noopener noreferrer">
@@ -521,8 +521,8 @@ const TutorProfile = () => {
                   {/* Rate & save */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-3xl font-bold text-foreground">${tutor.hourly_rate}</span>
-                      <span className="text-muted-foreground text-sm">/hr</span>
+                      <span className="text-3xl font-bold text-foreground">रू {tutor.hourly_rate?.toLocaleString()}</span>
+                      <span className="text-muted-foreground text-sm">/session</span>
                     </div>
                     <button
                       onClick={() => setSaved((s) => !s)}

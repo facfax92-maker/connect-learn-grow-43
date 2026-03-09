@@ -2,12 +2,12 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 
 const tutors = [
-  { name: "Sarah Johnson", subject: "Mathematics", rating: 4.9, rate: 45 },
-  { name: "David Chen", subject: "Physics", rating: 5.0, rate: 55 },
-  { name: "Emily Rivera", subject: "English Literature", rating: 4.8, rate: 40 },
-  { name: "James Okonkwo", subject: "Computer Science", rating: 4.9, rate: 60 },
-  { name: "Priya Patel", subject: "Chemistry", rating: 4.7, rate: 42 },
-  { name: "Marcus Lee", subject: "Music Theory", rating: 5.0, rate: 50 },
+  { name: "Sita Sharma", subject: "SEE Mathematics", rating: 4.9, rate: 1500 },
+  { name: "Rajesh Adhikari", subject: "NEB Physics", rating: 5.0, rate: 2000 },
+  { name: "Anita Gurung", subject: "English Communication", rating: 4.8, rate: 1200 },
+  { name: "Bikash Thapa", subject: "IOE Entrance Prep", rating: 4.9, rate: 2500 },
+  { name: "Priya Joshi", subject: "NEB Chemistry", rating: 4.7, rate: 1800 },
+  { name: "Manish Shrestha", subject: "Loksewa Preparation", rating: 5.0, rate: 2000 },
 ];
 
 const FeaturedTutors = () => (
@@ -21,7 +21,7 @@ const FeaturedTutors = () => (
       >
         Featured Tutors
       </motion.h2>
-      <p className="text-center text-muted-foreground mt-3">Top-rated educators ready to help you succeed</p>
+      <p className="text-center text-muted-foreground mt-3">Top-rated educators across Nepal ready to help you succeed</p>
 
       <div className="mt-12 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
         {tutors.map((tutor, i) => (
@@ -42,7 +42,7 @@ const FeaturedTutors = () => (
               <Star className="text-primary fill-primary" size={14} />
               <span className="font-medium">{tutor.rating}</span>
             </div>
-            <p className="mt-3 text-lg font-bold text-primary">${tutor.rate}<span className="text-xs font-normal text-muted-foreground">/hr</span></p>
+            <p className="mt-3 text-lg font-bold text-primary">रू {tutor.rate.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/session</span></p>
           </motion.div>
         ))}
       </div>

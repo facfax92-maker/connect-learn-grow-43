@@ -8,16 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { User, Upload, BookOpen, Target, ArrowRight, ArrowLeft, Check } from "lucide-react";
-
-const SUBJECTS = ["Math", "Science", "English", "History", "Coding", "Music", "Languages", "Test Prep"];
-const GRADE_LEVELS = [
-  { value: "middle_school", label: "Middle School" },
-  { value: "high_school", label: "High School" },
-  { value: "university", label: "University" },
-  { value: "adult_learner", label: "Adult Learner" },
-] as const;
+import { NEPAL_SUBJECTS, GRADE_LEVELS, NEPAL_CITIES, ENTRANCE_EXAMS } from "@/lib/constants";
 
 const StudentOnboarding = () => {
   const [step, setStep] = useState(1);
@@ -27,6 +21,10 @@ const StudentOnboarding = () => {
   const [gradeLevel, setGradeLevel] = useState<string>("");
   const [subjects, setSubjects] = useState<string[]>([]);
   const [learningGoals, setLearningGoals] = useState("");
+  const [schoolName, setSchoolName] = useState("");
+  const [district, setDistrict] = useState("");
+  const [entranceTarget, setEntranceTarget] = useState("");
+  const [parentContact, setParentContact] = useState("");
   const [loading, setLoading] = useState(false);
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
@@ -61,18 +59,21 @@ const StudentOnboarding = () => {
       }
     }
 
-    // Update profile
     await supabase.from("profiles").update({
       full_name: fullName,
       avatar_url: avatarUrl,
+      city: district || null,
     }).eq("user_id", user.id);
 
-    // Insert student profile
     await supabase.from("student_profiles").insert({
       user_id: user.id,
       grade_level: gradeLevel as any,
       subjects,
       learning_goals: learningGoals,
+      school_name: schoolName || null,
+      district: district || null,
+      entrance_exam_target: entranceTarget || null,
+      parent_contact: parentContact || null,
     });
 
     await refreshProfile();
@@ -120,7 +121,7 @@ const StudentOnboarding = () => {
                 </CardHeader>
                 <div className="space-y-2">
                   <Label>Full Name</Label>
-                  <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" />
+                  <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ram Sharma" />
                 </div>
                 <div className="space-y-2">
                   <Label>Profile Photo</Label>
@@ -140,6 +141,21 @@ const StudentOnboarding = () => {
                     </label>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label>School / College Name</Label>
+                  <Input value={schoolName} onChange={(e) => setSchoolName(e.target.value)} placeholder="e.g. Budhanilkantha School" />
+                </div>
+                <div className="space-y-2">
+                  <Label>City / District</Label>
+                  <Select value={district} onValueChange={setDistrict}>
+                    <SelectTrigger><SelectValue placeholder="Select city" /></SelectTrigger>
+                    <SelectContent>
+                      {NEPAL_CITIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </>
             )}
 
@@ -149,12 +165,12 @@ const StudentOnboarding = () => {
                   <CardTitle className="text-lg">Grade Level</CardTitle>
                   <CardDescription>What's your current level?</CardDescription>
                 </CardHeader>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   {GRADE_LEVELS.map((gl) => (
                     <button
                       key={gl.value}
                       onClick={() => setGradeLevel(gl.value)}
-                      className={`rounded-lg border-2 p-4 text-sm font-medium transition-all ${gradeLevel === gl.value ? "border-primary bg-accent text-foreground" : "border-border hover:border-primary/50"}`}
+                      className={`rounded-lg border-2 p-4 text-sm font-medium transition-all text-left ${gradeLevel === gl.value ? "border-primary bg-accent text-foreground" : "border-border hover:border-primary/50"}`}
                     >
                       {gl.label}
                     </button>
@@ -166,20 +182,31 @@ const StudentOnboarding = () => {
             {step === 3 && (
               <>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-lg">Subjects</CardTitle>
+                  <CardTitle className="text-lg">Subjects & Exam Target</CardTitle>
                   <CardDescription>What do you need help with?</CardDescription>
                 </CardHeader>
                 <div className="flex flex-wrap gap-2">
-                  {SUBJECTS.map((sub) => (
+                  {NEPAL_SUBJECTS.map((sub) => (
                     <Badge
                       key={sub}
                       variant={subjects.includes(sub) ? "default" : "outline"}
-                      className="cursor-pointer text-sm px-4 py-2"
+                      className="cursor-pointer text-sm px-3 py-1.5"
                       onClick={() => toggleSubject(sub)}
                     >
                       {sub}
                     </Badge>
                   ))}
+                </div>
+                <div className="space-y-2 pt-2">
+                  <Label>Entrance Exam Target (optional)</Label>
+                  <Select value={entranceTarget} onValueChange={setEntranceTarget}>
+                    <SelectTrigger><SelectValue placeholder="Select if applicable" /></SelectTrigger>
+                    <SelectContent>
+                      {ENTRANCE_EXAMS.map((e) => (
+                        <SelectItem key={e} value={e}>{e}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </>
             )}
@@ -193,9 +220,18 @@ const StudentOnboarding = () => {
                 <Textarea
                   value={learningGoals}
                   onChange={(e) => setLearningGoals(e.target.value)}
-                  placeholder="e.g., Improve my grades in math, prepare for SAT, learn Python..."
+                  placeholder="e.g., Score A+ in SEE, crack IOE entrance exam, improve English speaking..."
                   rows={4}
                 />
+                <div className="space-y-2">
+                  <Label>Parent/Guardian Contact (optional)</Label>
+                  <Input
+                    value={parentContact}
+                    onChange={(e) => setParentContact(e.target.value)}
+                    placeholder="+977 98XXXXXXXX"
+                  />
+                  <p className="text-xs text-muted-foreground">For younger students — we may share progress updates</p>
+                </div>
               </>
             )}
 

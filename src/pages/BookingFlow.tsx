@@ -262,7 +262,7 @@ const BookingFlow = () => {
                 ))}
                 <div className="border-t border-border pt-2 mt-2 flex justify-between font-bold text-base">
                   <span className="text-foreground">Total</span>
-                  <span className="text-foreground">${price.toFixed(2)}</span>
+                  <span className="text-foreground">रू {price.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -341,7 +341,7 @@ const BookingFlow = () => {
         </Avatar>
         <div>
           <p className="font-semibold text-foreground">{state.tutorName || "Your Tutor"}</p>
-          <p className="text-sm text-muted-foreground">${state.hourlyRate}/hr</p>
+          <p className="text-sm text-muted-foreground">रू {state.hourlyRate?.toLocaleString()}/session</p>
         </div>
       </CardContent>
     </Card>
@@ -418,11 +418,11 @@ const BookingFlow = () => {
               </div>
 
               {/* Price preview */}
-              <div className="p-4 rounded-lg bg-accent flex items-center justify-between">
+               <div className="p-4 rounded-lg bg-accent flex items-center justify-between">
                 <span className="text-sm text-accent-foreground">
-                  {DURATIONS.find((d) => d.value === duration)?.label} × ${state.hourlyRate}/hr
+                  {DURATIONS.find((d) => d.value === duration)?.label} × रू {state.hourlyRate?.toLocaleString()}/session
                 </span>
-                <span className="text-2xl font-bold text-foreground">${price.toFixed(2)}</span>
+                <span className="text-2xl font-bold text-foreground">रू {price.toLocaleString()}</span>
               </div>
 
               <Button className="w-full" disabled={!subject} onClick={() => setStep(2)}>
@@ -564,7 +564,7 @@ const BookingFlow = () => {
                 ))}
                 <div className="border-t border-border pt-3 flex justify-between font-bold text-base">
                   <span className="text-foreground">Total</span>
-                  <span className="text-foreground">${price.toFixed(2)}</span>
+                  <span className="text-foreground">रू {price.toLocaleString()}</span>
                 </div>
               </div>
 

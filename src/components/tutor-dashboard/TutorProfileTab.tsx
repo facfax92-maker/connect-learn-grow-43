@@ -17,10 +17,9 @@ import {
 import { Eye, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const ALL_SUBJECTS = [
-  "Math", "Science", "English", "History", "Coding", "Music", "Languages", "Test Prep",
-  "Physics", "Chemistry", "Biology", "Economics",
-];
+import { NEPAL_SUBJECTS, NEPAL_CITIES, ENTRANCE_EXAMS, PRICE_RANGE } from "@/lib/constants";
+
+const ALL_SUBJECTS = NEPAL_SUBJECTS;
 
 type Props = {
   user: any;
@@ -144,13 +143,13 @@ const TutorProfileTab = ({ user, profile, tutorProfile, setTutorProfile, refresh
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Hourly Rate (रू)</label>
+              <label className="text-sm font-medium text-foreground mb-1 block">Per Session Rate (रू)</label>
               <Input
                 type="number"
                 value={rate}
                 onChange={(e) => setRate(e.target.value)}
-                min={100}
-                max={10000}
+                min={PRICE_RANGE.min}
+                max={PRICE_RANGE.max}
               />
             </div>
             <div>

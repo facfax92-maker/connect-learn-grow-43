@@ -81,23 +81,9 @@ const TABS = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-const GRADE_LEVELS = [
-  { value: "middle_school", label: "Middle School" },
-  { value: "high_school", label: "High School" },
-  { value: "university", label: "University" },
-  { value: "adult_learner", label: "Adult Learner" },
-];
+import { GRADE_LEVELS, NEPAL_SUBJECTS } from "@/lib/constants";
 
-const ALL_SUBJECTS = [
-  "Math",
-  "Science",
-  "English",
-  "History",
-  "Coding",
-  "Music",
-  "Languages",
-  "Test Prep",
-];
+const ALL_SUBJECTS = NEPAL_SUBJECTS;
 
 const fmtTime = (t: string) => {
   const h = parseInt(t.split(":")[0], 10);
@@ -577,8 +563,7 @@ const StudentDashboard = () => {
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {s.subject} ·{" "}
-                              {format(new Date(s.date), "MMM d")} · $
-                              {s.price}
+                              {format(new Date(s.date), "MMM d")} · रू{s.price?.toLocaleString()}
                             </p>
                             <Badge
                               variant={
@@ -661,7 +646,7 @@ const StudentDashboard = () => {
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                               <span>{t.rating || "New"}</span>
-                              <span>· ${t.hourly_rate}/hr</span>
+                              <span>· रू {t.hourly_rate?.toLocaleString()}/session</span>
                             </div>
                           </div>
                         </div>

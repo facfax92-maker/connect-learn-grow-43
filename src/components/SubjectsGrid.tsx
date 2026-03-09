@@ -1,15 +1,15 @@
 import { motion } from "framer-motion";
-import { Calculator, Atom, BookOpen, Landmark, Code, Music, Globe, ClipboardCheck } from "lucide-react";
+import { Calculator, Atom, BookOpen, Code, Globe, ClipboardCheck, GraduationCap, Briefcase } from "lucide-react";
 
 const subjects = [
+  { icon: ClipboardCheck, label: "SEE Preparation" },
+  { icon: Atom, label: "NEB Science" },
+  { icon: Briefcase, label: "NEB Management" },
+  { icon: GraduationCap, label: "IOE Entrance" },
   { icon: Calculator, label: "Math" },
-  { icon: Atom, label: "Science" },
   { icon: BookOpen, label: "English" },
-  { icon: Landmark, label: "History" },
-  { icon: Code, label: "Coding" },
-  { icon: Music, label: "Music" },
-  { icon: Globe, label: "Languages" },
-  { icon: ClipboardCheck, label: "Test Prep" },
+  { icon: Code, label: "Computer Basics" },
+  { icon: Globe, label: "Loksewa Prep" },
 ];
 
 const SubjectsGrid = () => (
@@ -23,7 +23,7 @@ const SubjectsGrid = () => (
       >
         Explore Subjects
       </motion.h2>
-      <p className="text-center text-muted-foreground mt-3">Find expert tutors in any subject</p>
+      <p className="text-center text-muted-foreground mt-3">Find expert tutors for any subject across Nepal</p>
 
       <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
         {subjects.map((s, i) => (
