@@ -59,6 +59,8 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [connectionStatus, setConnectionStatus] = useState<Record<string, string>>({});
+  const [messageLimitReached, setMessageLimitReached] = useState(false);
 
   useEffect(() => {
     if (!user) navigate("/login");
