@@ -17,10 +17,9 @@ import {
 import { Eye, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const ALL_SUBJECTS = [
-  "Math", "Science", "English", "History", "Coding", "Music", "Languages", "Test Prep",
-  "Physics", "Chemistry", "Biology", "Economics",
-];
+import { NEPAL_SUBJECTS, NEPAL_CITIES, ENTRANCE_EXAMS, PRICE_RANGE } from "@/lib/constants";
+
+const ALL_SUBJECTS = NEPAL_SUBJECTS;
 
 type Props = {
   user: any;
