@@ -119,8 +119,8 @@ const TutorProfile = () => {
   );
   const [selectedSlot, setSelectedSlot] = useState<{ date: Date; time: string } | null>(null);
 
-  const enrichReviews = async (rawReviews: { id: string; rating: number; comment: string | null; created_at: string; student_id: string }[]) => {
-    if (rawReviews.length === 0) return [];
+  const enrichReviews = async (rawReviews: any[]) => {
+    if (rawReviews.length === 0) return [] as ReviewWithProfile[];
     const ids = [...new Set(rawReviews.map((r) => r.student_id))];
     const { data: profilesData } = await supabase
       .from("profiles")
@@ -129,9 +129,13 @@ const TutorProfile = () => {
     const pm = new Map((profilesData || []).map((p) => [p.user_id, p]));
     return rawReviews.map((r) => ({
       ...r,
+      tags: r.tags || [],
+      tutor_reply: r.tutor_reply || null,
+      reply_at: r.reply_at || null,
+      flagged: r.flagged || false,
       reviewer_name: pm.get(r.student_id)?.full_name ?? null,
       reviewer_avatar: pm.get(r.student_id)?.avatar_url ?? null,
-    }));
+    })) as ReviewWithProfile[];
   };
 
   useEffect(() => {
