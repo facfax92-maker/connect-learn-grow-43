@@ -159,6 +159,21 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (!user) return;
+    // Fetch which bookings already have reviews
+    const fetchReviewedIds = async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("booking_id")
+        .eq("student_id", user.id);
+      if (data) {
+        setReviewedBookingIds(new Set(data.map((r: any) => r.booking_id).filter(Boolean)));
+      }
+    };
+    fetchReviewedIds();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
     if (activeTab === "overview" || activeTab === "sessions") fetchSessions();
     if (activeTab === "saved") fetchSavedTutors();
     if (activeTab === "reviews") fetchReviews();
