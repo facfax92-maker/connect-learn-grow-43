@@ -134,6 +134,11 @@ const TutorDashboard = () => {
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
 
+  // Connections (My Students)
+  const [connectedStudents, setConnectedStudents] = useState<any[]>([]);
+  const [pendingConnections, setPendingConnections] = useState<any[]>([]);
+  const [estimatorRate, setEstimatorRate] = useState("");
+
   useEffect(() => {
     if (!user) return;
     supabase
@@ -153,6 +158,7 @@ const TutorDashboard = () => {
     if (activeTab === "reviews") fetchReviews();
     if (activeTab === "settings") loadSettings();
     if (activeTab === "messages") navigate("/messages");
+    if (activeTab === "students") fetchConnections();
   }, [activeTab, user, tutorProfile]);
 
   const fetchSessions = async () => {
