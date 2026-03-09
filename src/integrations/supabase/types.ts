@@ -208,32 +208,79 @@ export type Database = {
         }
         Relationships: []
       }
+      review_flags: {
+        Row: {
+          created_at: string
+          flagged_by: string
+          id: string
+          reason: string
+          review_id: string
+        }
+        Insert: {
+          created_at?: string
+          flagged_by: string
+          id?: string
+          reason: string
+          review_id: string
+        }
+        Update: {
+          created_at?: string
+          flagged_by?: string
+          id?: string
+          reason?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_flags_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
+          booking_id: string | null
           comment: string | null
           created_at: string
+          flagged: boolean | null
           id: string
           rating: number
+          reply_at: string | null
           student_id: string
+          tags: string[] | null
           tutor_id: string
+          tutor_reply: string | null
           updated_at: string
         }
         Insert: {
+          booking_id?: string | null
           comment?: string | null
           created_at?: string
+          flagged?: boolean | null
           id?: string
           rating: number
+          reply_at?: string | null
           student_id: string
+          tags?: string[] | null
           tutor_id: string
+          tutor_reply?: string | null
           updated_at?: string
         }
         Update: {
+          booking_id?: string | null
           comment?: string | null
           created_at?: string
+          flagged?: boolean | null
           id?: string
           rating?: number
+          reply_at?: string | null
           student_id?: string
+          tags?: string[] | null
           tutor_id?: string
+          tutor_reply?: string | null
           updated_at?: string
         }
         Relationships: []
