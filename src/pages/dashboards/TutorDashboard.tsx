@@ -69,6 +69,7 @@ type AvailSlot = {
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "students", label: "My Students", icon: UserCheck },
   { id: "sessions", label: "Sessions", icon: Calendar },
   { id: "availability", label: "Availability", icon: Clock },
   { id: "messages", label: "Messages", icon: MessageCircle },
