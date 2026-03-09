@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -36,6 +37,7 @@ type TutorWithProfile = {
 };
 
 const TutorDiscovery = () => {
+  const navigate = useNavigate();
   const [tutors, setTutors] = useState<TutorWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -336,7 +338,7 @@ const TutorDiscovery = () => {
                 const bioSnippet = tutor.bio ? (tutor.bio.length > 80 ? tutor.bio.slice(0, 80) + "…" : tutor.bio) : "";
 
                 return (
-                  <Card key={tutor.id} className="group overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                  <Card key={tutor.id} className="group overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/tutors/${tutor.id}`)}>
                     <CardContent className="p-5 space-y-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
@@ -380,7 +382,7 @@ const TutorDiscovery = () => {
 
                       <div className="flex items-center justify-between pt-2 border-t border-border">
                         <span className="text-lg font-bold text-foreground">${tutor.hourly_rate}/hr</span>
-                        <Button size="sm">View Profile</Button>
+                        <Button size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/tutors/${tutor.id}`); }}>View Profile</Button>
                       </div>
                     </CardContent>
                   </Card>
