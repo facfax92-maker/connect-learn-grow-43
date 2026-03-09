@@ -143,7 +143,7 @@ const TutorProfileTab = ({ user, profile, tutorProfile, setTutorProfile, refresh
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Hourly Rate (रू)</label>
+              <label className="text-sm font-medium text-foreground mb-1 block">Per Session Rate (रू)</label>
               <Input
                 type="number"
                 value={rate}
