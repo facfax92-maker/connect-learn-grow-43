@@ -5,10 +5,15 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Chrome } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,13 +23,25 @@ const Login = () => {
   const navigate = useNavigate();
 
   const redirectByRole = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: auth } = await supabase.auth.getUser();
+    const user = auth.user;
     if (!user) return;
+
+    // Admin check via server-side role table
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: user.id,
+      _role: "admin",
+    });
+    if (isAdmin) {
+      navigate("/admin");
+      return;
+    }
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (profile?.role === "student") {
       navigate("/student/dashboard");
@@ -40,11 +57,13 @@ const Login = () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
+
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
-    } else {
-      await redirectByRole();
+      return;
     }
+
+    await redirectByRole();
   };
 
   const handleGoogleLogin = async () => {
@@ -52,11 +71,13 @@ const Login = () => {
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin + "/login",
     });
+
     if (result.error) {
       toast({ title: "Google login failed", description: String(result.error), variant: "destructive" });
-    } else {
-      await redirectByRole();
+      setLoading(false);
+      return;
     }
+
     setLoading(false);
   };
 
@@ -101,6 +122,7 @@ const Login = () => {
                 />
               </div>
             </div>
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
@@ -121,6 +143,7 @@ const Login = () => {
                 />
               </div>
             </div>
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Logging in..." : "Log In"}
             </Button>
@@ -132,6 +155,10 @@ const Login = () => {
               Sign up
             </Link>
           </p>
+
+          <Button variant="outline" className="w-full" onClick={redirectByRole}>
+            Continue
+          </Button>
         </CardContent>
       </Card>
     </div>

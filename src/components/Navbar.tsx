@@ -7,7 +7,7 @@ import NotificationBell from "@/components/NotificationBell";
 
 const navLinks = [
   { label: "Find Tutors", href: "/tutors" },
-  { label: "Become a Tutor", href: "/signup" },
+  { label: "Become a Tutor", href: "/signup?intent=tutor" },
   { label: "How It Works", href: "/#how-it-works" },
 ];
 
@@ -33,7 +33,7 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          
+
           {/* Nepali language toggle placeholder */}
           <button
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded border border-border"
@@ -45,10 +45,7 @@ const Navbar = () => {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <Link
-                to="/messages"
-                className="p-2 rounded-full hover:bg-muted transition-colors"
-              >
+              <Link to="/messages" className="p-2 rounded-full hover:bg-muted transition-colors">
                 <MessageCircle className="h-5 w-5 text-muted-foreground" />
               </Link>
               <NotificationBell />

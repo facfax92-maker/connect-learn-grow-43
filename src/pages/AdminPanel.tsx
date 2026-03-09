@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
-  LayoutDashboard, Users, GraduationCap, Link2, CreditCard, Star, Settings,
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  Link2,
+  Wallet,
+  Star,
+  Settings,
 } from "lucide-react";
 import AdminDashboardTab from "@/components/admin/AdminDashboardTab";
 import AdminTutorsTab from "@/components/admin/AdminTutorsTab";
@@ -22,7 +28,7 @@ const TABS = [
   { id: "tutors", label: "Tutors", icon: Users },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "connections", label: "Connections", icon: Link2 },
-  { id: "payments", label: "Payments", icon: CreditCard },
+  { id: "payments", label: "Payments", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "settings", label: "Settings", icon: Settings },
 ];

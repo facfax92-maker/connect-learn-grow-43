@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, DollarSign, Star, Clock, Check, X } from "lucide-react";
-import { format, subDays, isToday } from "date-fns";
+import { Calendar, Users, Wallet, Star, Check, X } from "lucide-react";
+import { format, subDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -35,7 +35,7 @@ type Props = {
   tutorProfile: any;
 };
 
-const TutorOverview = ({ user, profile, tutorProfile }: Props) => {
+const TutorOverview = ({ profile, tutorProfile }: Props) => {
   const { toast } = useToast();
   const [stats, setStats] = useState({ earnings: 0, upcoming: 0, students: 0 });
   const [earningsChart, setEarningsChart] = useState<any[]>([]);
@@ -134,7 +134,7 @@ const TutorOverview = ({ user, profile, tutorProfile }: Props) => {
     <div className="max-w-5xl space-y-6">
       <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/10 to-accent">
         <h1 className="font-display text-2xl font-bold text-foreground">
-          Welcome back, {profile?.full_name || "Tutor"}! 👋
+          Welcome back, {profile?.full_name || "Tutor"}!
         </h1>
         <p className="mt-1 text-muted-foreground text-sm">
           {tutorProfile?.status === "approved"
@@ -146,7 +146,7 @@ const TutorOverview = ({ user, profile, tutorProfile }: Props) => {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Earnings (30d)", value: `रू ${stats.earnings.toLocaleString()}`, icon: DollarSign },
+          { label: "Earnings (30d)", value: `रू ${stats.earnings.toLocaleString()}`, icon: Wallet },
           { label: "Upcoming", value: stats.upcoming, icon: Calendar },
           { label: "Students", value: stats.students, icon: Users },
           { label: "Rating", value: tutorProfile?.rating?.toFixed(1) || "—", icon: Star },
@@ -174,7 +174,12 @@ const TutorOverview = ({ user, profile, tutorProfile }: Props) => {
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={earningsChart}>
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={6} stroke="hsl(var(--muted-foreground))" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10 }}
+                  interval={6}
+                  stroke="hsl(var(--muted-foreground))"
+                />
                 <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
@@ -252,7 +257,7 @@ const TutorOverview = ({ user, profile, tutorProfile }: Props) => {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">{b.student_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {b.subject} · {format(new Date(b.date), "MMM d")} at {fmtTime(b.start_time)} · रू {b.price}
+                    {b.subject} · {format(new Date(b.date), "MMM d")} at {fmtTime(b.start_time)} · रू {b.price?.toLocaleString()}
                   </p>
                 </div>
                 <div className="flex gap-2">

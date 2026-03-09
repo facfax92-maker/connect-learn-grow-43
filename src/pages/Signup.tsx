@@ -1,41 +1,68 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { GraduationCap, BookOpen, User, Mail, Lock, Chrome } from "lucide-react";
+import { GraduationCap, BookOpen, Mail, Lock, Chrome } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 type Role = "student" | "tutor";
 
+type Step = "credentials" | "check_email" | "role";
+
 const Signup = () => {
-  const [step, setStep] = useState<"credentials" | "role">("credentials");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user, refreshProfile } = useAuth();
+
+  const [step, setStep] = useState<Step>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { refreshProfile } = useAuth();
+
+  useEffect(() => {
+    if (searchParams.get("step") === "role") setStep("role");
+  }, [searchParams]);
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: window.location.origin },
     });
+
     setLoading(false);
+
     if (error) {
-      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
-    } else {
-      setStep("role");
+      toast({
+        title: "Signup failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
     }
+
+    // If email confirmation is enabled, session may be null until the user confirms.
+    if (!data.session) {
+      setStep("check_email");
+      return;
+    }
+
+    setStep("role");
   };
 
   const handleGoogleSignup = async () => {
@@ -44,36 +71,105 @@ const Signup = () => {
       redirect_uri: window.location.origin + "/signup?step=role",
     });
     if (result.error) {
-      toast({ title: "Google signup failed", description: String(result.error), variant: "destructive" });
+      toast({
+        title: "Google signup failed",
+        description: String(result.error),
+        variant: "destructive",
+      });
     }
     setLoading(false);
+  };
+
+  const ensureProfileRow = async (uid: string) => {
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("user_id", uid)
+      .maybeSingle();
+
+    if (existing) return;
+
+    const { data: authUser } = await supabase.auth.getUser();
+
+    await supabase.from("profiles").insert({
+      user_id: uid,
+      email: authUser.user?.email ?? null,
+      full_name: (authUser.user?.user_metadata as any)?.full_name ?? null,
+      avatar_url: (authUser.user?.user_metadata as any)?.avatar_url ?? null,
+      role: null,
+    });
+  };
+
+  const ensureUserRole = async (uid: string, role: Role) => {
+    const { data: existing } = await supabase
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", uid)
+      .eq("role", role)
+      .maybeSingle();
+
+    if (existing) return;
+
+    await supabase.from("user_roles").insert({ user_id: uid, role });
   };
 
   const handleRoleSelect = async (role: Role) => {
-    setSelectedRole(role);
     setLoading(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({ title: "Error", description: "Not authenticated", variant: "destructive" });
+    const uid = user?.id;
+    if (!uid) {
+      toast({
+        title: "Confirm your email",
+        description: "Please confirm your email, then log in to continue setup.",
+        variant: "destructive",
+      });
       setLoading(false);
+      navigate("/login");
       return;
     }
 
-    // Update profile with role
-    await supabase.from("profiles").update({ role }).eq("user_id", user.id);
-    // Insert user_role
-    await supabase.from("user_roles").insert({ user_id: user.id, role });
+    try {
+      await ensureProfileRow(uid);
+      await supabase.from("profiles").update({ role }).eq("user_id", uid);
+      await ensureUserRole(uid, role);
+      await refreshProfile();
 
-    await refreshProfile();
-    setLoading(false);
-
-    if (role === "student") {
-      navigate("/onboarding/student");
-    } else {
-      navigate("/onboarding/tutor");
+      navigate(role === "student" ? "/onboarding/student" : "/onboarding/tutor");
+    } catch (err: any) {
+      toast({
+        title: "Setup failed",
+        description: err?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (step === "check_email") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <a href="/" className="font-display text-2xl font-bold text-secondary">
+              Tutor<span className="text-primary">Connect</span>
+            </a>
+            <CardTitle className="mt-4 font-display text-2xl">Check your email</CardTitle>
+            <CardDescription>
+              We sent a confirmation link to <span className="font-medium">{email}</span>. Confirm it, then log in to
+              finish setup.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Link to="/login">
+              <Button className="w-full">Go to Login</Button>
+            </Link>
+            <Button variant="outline" className="w-full" onClick={() => setStep("credentials")}>Sign up with a different email</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (step === "role") {
     return (
@@ -87,11 +183,24 @@ const Signup = () => {
             <p className="mt-2 text-muted-foreground">Choose your role to get started</p>
           </div>
 
+          {!user && (
+            <Card>
+              <CardContent className="p-6 text-sm text-muted-foreground">
+                You’re not logged in yet—please confirm your email and log in, then come back to choose your role.
+                <div className="mt-4">
+                  <Link to="/login">
+                    <Button className="w-full">Go to Login</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid md:grid-cols-2 gap-6">
             <button
               onClick={() => handleRoleSelect("student")}
-              disabled={loading}
-              className="group relative flex flex-col items-center gap-4 rounded-xl border-2 border-border bg-card p-8 transition-all hover:border-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring"
+              disabled={loading || !user}
+              className="group relative flex flex-col items-center gap-4 rounded-xl border-2 border-border bg-card p-8 transition-all hover:border-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
             >
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent">
                 <BookOpen className="h-10 w-10 text-primary" />
@@ -102,8 +211,8 @@ const Signup = () => {
 
             <button
               onClick={() => handleRoleSelect("tutor")}
-              disabled={loading}
-              className="group relative flex flex-col items-center gap-4 rounded-xl border-2 border-border bg-card p-8 transition-all hover:border-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring"
+              disabled={loading || !user}
+              className="group relative flex flex-col items-center gap-4 rounded-xl border-2 border-border bg-card p-8 transition-all hover:border-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
             >
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent">
                 <GraduationCap className="h-10 w-10 text-primary" />
@@ -128,12 +237,7 @@ const Signup = () => {
           <CardDescription>Get started with TutorConnect today</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleSignup}
-            disabled={loading}
-          >
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loading}>
             <Chrome className="mr-2 h-5 w-5" />
             Continue with Google
           </Button>
@@ -163,6 +267,7 @@ const Signup = () => {
                 />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -179,6 +284,7 @@ const Signup = () => {
                 />
               </div>
             </div>
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Sign Up"}
             </Button>

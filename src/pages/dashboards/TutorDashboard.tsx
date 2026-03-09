@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   Calendar,
   Clock,
-  DollarSign,
+  Wallet,
   Star,
   User,
   MessageCircle,
@@ -26,7 +26,7 @@ const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "bookings", label: "Bookings", icon: Calendar },
   { id: "availability", label: "Availability", icon: Clock },
-  { id: "earnings", label: "Earnings", icon: DollarSign },
+  { id: "earnings", label: "Earnings", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "profile", label: "Profile", icon: User },
   { id: "messages", label: "Messages", icon: MessageCircle },
@@ -67,13 +67,15 @@ const TutorDashboard = () => {
         },
         (payload) => {
           toast({
-            title: "📩 New Booking Request!",
+            title: "New booking request",
             description: `A student wants to book a ${payload.new.subject} session.`,
           });
         }
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [tutorProfile, toast]);
 
   useEffect(() => {
@@ -133,24 +135,14 @@ const TutorDashboard = () => {
         {/* Main content */}
         <main className="flex-1 p-6 pb-24 md:pb-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
           {activeTab === "overview" && (
-            <TutorOverview
-              user={user}
-              profile={profile}
-              tutorProfile={tutorProfile}
-            />
+            <TutorOverview user={user} profile={profile} tutorProfile={tutorProfile} />
           )}
-          {activeTab === "bookings" && tutorProfile && (
-            <TutorBookings tutorProfile={tutorProfile} />
-          )}
+          {activeTab === "bookings" && tutorProfile && <TutorBookings tutorProfile={tutorProfile} />}
           {activeTab === "availability" && tutorProfile && (
             <TutorAvailability tutorProfile={tutorProfile} />
           )}
-          {activeTab === "earnings" && tutorProfile && (
-            <TutorEarnings tutorProfile={tutorProfile} />
-          )}
-          {activeTab === "reviews" && tutorProfile && (
-            <TutorReviews tutorProfile={tutorProfile} />
-          )}
+          {activeTab === "earnings" && tutorProfile && <TutorEarnings tutorProfile={tutorProfile} />}
+          {activeTab === "reviews" && tutorProfile && <TutorReviews tutorProfile={tutorProfile} />}
           {activeTab === "profile" && tutorProfile && (
             <TutorProfileTab
               user={user}
@@ -160,9 +152,7 @@ const TutorDashboard = () => {
               refreshProfile={refreshProfile}
             />
           )}
-          {activeTab === "settings" && (
-            <TutorSettings />
-          )}
+          {activeTab === "settings" && <TutorSettings />}
         </main>
       </div>
     </div>

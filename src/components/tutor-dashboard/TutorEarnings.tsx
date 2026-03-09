@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, Clock, Wallet } from "lucide-react";
+import { Wallet, Clock, Download } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -17,13 +17,10 @@ import {
 
 type Props = { tutorProfile: any };
 
-const PLATFORM_FEE_PERCENT = 10; // 10% platform commission on sessions
-
 const TutorEarnings = ({ tutorProfile }: Props) => {
   const { toast } = useToast();
   const [completedSessions, setCompletedSessions] = useState<any[]>([]);
-  const [totalGross, setTotalGross] = useState(0);
-  const [totalNet, setTotalNet] = useState(0);
+  const [totalEarned, setTotalEarned] = useState(0);
 
   useEffect(() => {
     fetchEarnings();
@@ -37,45 +34,61 @@ const TutorEarnings = ({ tutorProfile }: Props) => {
       .eq("status", "completed")
       .order("date", { ascending: false });
 
-    if (data && data.length > 0) {
-      // Enrich with student names
-      const sids = [...new Set(data.map((b: any) => b.student_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name")
-        .in("user_id", sids);
-      const pm = new Map(profiles?.map((p: any) => [p.user_id, p.full_name]) || []);
-
-      const enriched = data.map((b: any) => {
-        const gross = b.price || 0;
-        const fee = Math.round(gross * PLATFORM_FEE_PERCENT / 100);
-        return {
-          ...b,
-          student_name: pm.get(b.student_id) || "Student",
-          gross,
-          fee,
-          net: gross - fee,
-        };
-      });
-
-      setCompletedSessions(enriched);
-      setTotalGross(enriched.reduce((s: number, b: any) => s + b.gross, 0));
-      setTotalNet(enriched.reduce((s: number, b: any) => s + b.net, 0));
+    if (!data || data.length === 0) {
+      setCompletedSessions([]);
+      setTotalEarned(0);
+      return;
     }
+
+    // Enrich with student names
+    const sids = [...new Set(data.map((b: any) => b.student_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, full_name")
+      .in("user_id", sids);
+    const pm = new Map(profiles?.map((p: any) => [p.user_id, p.full_name]) || []);
+
+    const enriched = data.map((b: any) => ({
+      ...b,
+      student_name: pm.get(b.student_id) || "Student",
+      earned: b.price || 0,
+    }));
+
+    setCompletedSessions(enriched);
+    setTotalEarned(enriched.reduce((s: number, b: any) => s + b.earned, 0));
   };
 
-  const pendingPayout = totalNet; // simplified: all net is pending
+  const exportCsv = () => {
+    const now = new Date();
+    const header = "Date,Student,Subject,Duration,Earned\n";
+    const rows = completedSessions
+      .map(
+        (s) =>
+          `"${format(new Date(s.date), "yyyy-MM-dd")}","${s.student_name}","${s.subject}",${s.duration},${s.earned}`
+      )
+      .join("\n");
+
+    const blob = new Blob([header + rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `earnings-${format(now, "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="max-w-5xl space-y-6">
-      <h2 className="font-display text-xl font-bold text-foreground">Earnings</h2>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h2 className="font-display text-xl font-bold text-foreground">Earnings</h2>
+        <Button variant="outline" className="gap-2" onClick={exportCsv} disabled={completedSessions.length === 0}>
+          <Download className="h-4 w-4" /> Export CSV
+        </Button>
+      </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Gross", value: `रू ${totalGross.toLocaleString()}`, icon: DollarSign },
-          { label: "Platform Fees", value: `रू ${(totalGross - totalNet).toLocaleString()}`, icon: TrendingUp },
-          { label: "Net Earnings", value: `रू ${totalNet.toLocaleString()}`, icon: Wallet },
+          { label: "Total Earned", value: `रू ${totalEarned.toLocaleString()}`, icon: Wallet },
           { label: "Sessions", value: completedSessions.length, icon: Clock },
         ].map((s) => (
           <Card key={s.label}>
@@ -92,24 +105,24 @@ const TutorEarnings = ({ tutorProfile }: Props) => {
         ))}
       </div>
 
-      {/* Payout */}
       <Card>
-        <CardContent className="p-6 flex items-center justify-between flex-wrap gap-4">
+        <CardContent className="p-6 flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Available for Payout</p>
-            <p className="text-3xl font-bold text-foreground">रू {pendingPayout.toLocaleString()}</p>
+            <p className="text-sm text-muted-foreground">Payouts</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Payouts are handled manually (eSewa/Khalti). If you need a payout, contact support.
+            </p>
           </div>
           <Button
             size="lg"
-            disabled={pendingPayout === 0}
-            onClick={() => toast({ title: "Payout requested", description: "You'll receive your earnings within 3-5 business days." })}
+            variant="outline"
+            onClick={() => toast({ title: "Payout request received", description: "Support will contact you to arrange eSewa/Khalti payout." })}
           >
             Request Payout
           </Button>
         </CardContent>
       </Card>
 
-      {/* Sessions table */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Sessions Breakdown</CardTitle>
@@ -125,9 +138,8 @@ const TutorEarnings = ({ tutorProfile }: Props) => {
                   <TableHead>Student</TableHead>
                   <TableHead>Subject</TableHead>
                   <TableHead className="text-right">Duration</TableHead>
-                  <TableHead className="text-right">Gross</TableHead>
-                  <TableHead className="text-right">Fee</TableHead>
-                  <TableHead className="text-right">Net</TableHead>
+                  <TableHead className="text-right">Earned</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -137,9 +149,10 @@ const TutorEarnings = ({ tutorProfile }: Props) => {
                     <TableCell className="text-sm font-medium">{s.student_name}</TableCell>
                     <TableCell className="text-sm">{s.subject}</TableCell>
                     <TableCell className="text-sm text-right">{s.duration}min</TableCell>
-                    <TableCell className="text-sm text-right">रू {s.gross.toLocaleString()}</TableCell>
-                    <TableCell className="text-sm text-right text-destructive">-रू {s.fee.toLocaleString()}</TableCell>
-                    <TableCell className="text-sm text-right font-bold">रू {s.net.toLocaleString()}</TableCell>
+                    <TableCell className="text-sm text-right font-bold">रू {s.earned.toLocaleString()}</TableCell>
+                    <TableCell className="text-sm text-right">
+                      <Badge variant="secondary" className="capitalize">completed</Badge>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
