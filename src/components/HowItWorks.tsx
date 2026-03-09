@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, UserCheck, CalendarDays, FileText, MessageSquare, DollarSign } from "lucide-react";
+import { Search, UserCheck, CalendarDays, FileText, MessageSquare, Wallet } from "lucide-react";
 
 const studentSteps = [
-  { icon: Search, title: "Search", desc: "Browse tutors by subject, level, and availability." },
+  { icon: Search, title: "Search", desc: "Browse tutors by subject, grade level, and city across Nepal." },
   { icon: UserCheck, title: "Book", desc: "Choose your tutor and schedule a session that fits your calendar." },
   { icon: CalendarDays, title: "Learn", desc: "Meet online or in-person and start mastering your subject." },
 ];
 
 const tutorSteps = [
-  { icon: FileText, title: "Create Profile", desc: "Set up your profile showcasing skills, experience, and rates." },
+  { icon: FileText, title: "Create Profile", desc: "Set up your profile showcasing skills, experience, and per-session rate." },
   { icon: MessageSquare, title: "Get Matched", desc: "Students discover your profile and send booking requests." },
-  { icon: DollarSign, title: "Earn", desc: "Teach on your schedule and get paid securely after each session." },
+  { icon: Wallet, title: "Earn", desc: "Teach on your schedule and receive payments via eSewa or Khalti." },
 ];
 
 const HowItWorks = () => {

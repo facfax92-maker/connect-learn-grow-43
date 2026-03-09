@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X, MessageCircle, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "@/components/NotificationBell";
@@ -33,6 +33,16 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          
+          {/* Nepali language toggle placeholder */}
+          <button
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded border border-border"
+            title="नेपाली (Coming Soon)"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            <span>EN</span>
+          </button>
+
           {user ? (
             <div className="flex items-center gap-2">
               <Link
@@ -46,6 +56,8 @@ const Navbar = () => {
                 to={
                   profile?.role === "tutor"
                     ? "/tutor/dashboard"
+                    : profile?.role === "admin"
+                    ? "/admin"
                     : "/student/dashboard"
                 }
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ml-2"
@@ -110,6 +122,8 @@ const Navbar = () => {
                 to={
                   profile?.role === "tutor"
                     ? "/tutor/dashboard"
+                    : profile?.role === "admin"
+                    ? "/admin"
                     : "/student/dashboard"
                 }
                 className="block text-sm font-medium text-muted-foreground hover:text-foreground"

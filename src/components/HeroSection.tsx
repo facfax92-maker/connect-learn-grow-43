@@ -16,7 +16,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7 }}
           className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight max-w-3xl mx-auto"
         >
-          Find Your Perfect Tutor, Learn Anything
+          Find Your Perfect Tutor Across Nepal
         </motion.h1>
 
         <motion.p
@@ -25,7 +25,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7, delay: 0.15 }}
           className="mt-6 text-lg text-primary-foreground/70 max-w-xl mx-auto"
         >
-          Connect with expert tutors in any subject. Personalized learning, on your schedule.
+          Connect with expert tutors for SEE, NEB, entrance exams and more. Personalized learning, on your schedule.
         </motion.p>
 
         <motion.div
@@ -36,12 +36,12 @@ const HeroSection = () => {
         >
           <input
             type="text"
-            placeholder="Subject (e.g. Math, Piano)"
+            placeholder="Subject (e.g. SEE Prep, Physics)"
             className="flex-1 px-4 py-3 rounded-xl bg-muted text-foreground placeholder:text-muted-foreground text-sm outline-none focus:ring-2 focus:ring-primary/40"
           />
           <input
             type="text"
-            placeholder="Grade / Level"
+            placeholder="City (e.g. Kathmandu)"
             className="flex-1 px-4 py-3 rounded-xl bg-muted text-foreground placeholder:text-muted-foreground text-sm outline-none focus:ring-2 focus:ring-primary/40"
           />
           <Button size="lg" className="gap-2 px-6">

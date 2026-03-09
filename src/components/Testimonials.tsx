@@ -3,19 +3,19 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    quote: "TutorConnect helped me raise my math grade from a C to an A in just two months. My tutor was amazing!",
-    name: "Ava Thompson",
-    detail: "High School Student",
+    quote: "TutorConnect helped me score A+ in my SEE exams. My math tutor was incredibly patient and knowledgeable!",
+    name: "Aayush Shrestha",
+    detail: "SEE Student, Kathmandu",
   },
   {
-    quote: "I finally understand organic chemistry thanks to my tutor on TutorConnect. Worth every penny.",
-    name: "Liam Nakamura",
-    detail: "College Sophomore",
+    quote: "I finally understand organic chemistry thanks to my tutor on TutorConnect. Best investment for my NEB preparation.",
+    name: "Srijana Tamang",
+    detail: "Grade 12 Science, Lalitpur",
   },
   {
-    quote: "As a parent, I love how easy it is to find qualified tutors. The booking process is seamless.",
-    name: "Rachel Martinez",
-    detail: "Parent",
+    quote: "As a parent, I love how easy it is to find qualified tutors in our city. The platform is simple and trustworthy.",
+    name: "Ramesh Poudel",
+    detail: "Parent, Pokhara",
   },
 ];
 
