@@ -1,5 +1,8 @@
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Mail, Phone } from "lucide-react";
 import { SUPPORT_EMAIL, SUPPORT_PHONE } from "@/lib/constants";
+
+const ESEWA_NUMBER = "9808031193";
+const KHALTI_NUMBER = "9818207798";
 
 const Footer = () => (
   <footer className="bg-secondary text-secondary-foreground py-16">
@@ -21,24 +24,42 @@ const Footer = () => (
             <li><a href="/tutors" className="hover:text-primary transition-colors">Find Tutors</a></li>
             <li><a href="/signup" className="hover:text-primary transition-colors">Become a Tutor</a></li>
             <li><a href="/#how-it-works" className="hover:text-primary transition-colors">How It Works</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="font-display font-bold text-sm mb-4">Support</h4>
-          <ul className="space-y-2 text-sm text-secondary-foreground/60">
-            <li><a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-primary transition-colors">{SUPPORT_EMAIL}</a></li>
-            <li><a href={`tel:${SUPPORT_PHONE.replace(/\s/g, "")}`} className="hover:text-primary transition-colors">{SUPPORT_PHONE}</a></li>
             <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
             <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="font-display font-bold text-sm mb-4">Payment Methods</h4>
-          <ul className="space-y-2 text-sm text-secondary-foreground/60">
-            <li>eSewa</li>
-            <li>Khalti</li>
+          <h4 className="font-display font-bold text-sm mb-4">Contact Us</h4>
+          <ul className="space-y-3 text-sm text-secondary-foreground/60">
+            <li>
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Mail size={14} />
+                {SUPPORT_EMAIL}
+              </a>
+            </li>
+            <li>
+              <a href={`tel:+977${SUPPORT_PHONE.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Phone size={14} />
+                +977 {SUPPORT_PHONE}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-display font-bold text-sm mb-4">Payment Details</h4>
+          <ul className="space-y-3 text-sm">
+            <li className="rounded-lg bg-secondary-foreground/5 px-3 py-2">
+              <p className="font-semibold text-secondary-foreground/80 text-xs uppercase tracking-wide mb-1">eSewa</p>
+              <p className="text-secondary-foreground font-mono font-bold">{ESEWA_NUMBER}</p>
+              <p className="text-secondary-foreground/50 text-xs">TutorConnect</p>
+            </li>
+            <li className="rounded-lg bg-secondary-foreground/5 px-3 py-2">
+              <p className="font-semibold text-secondary-foreground/80 text-xs uppercase tracking-wide mb-1">Khalti</p>
+              <p className="text-secondary-foreground font-mono font-bold">{KHALTI_NUMBER}</p>
+              <p className="text-secondary-foreground/50 text-xs">TutorConnect</p>
+            </li>
           </ul>
         </div>
       </div>
