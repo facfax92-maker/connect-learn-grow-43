@@ -37,6 +37,7 @@ type TutorWithProfile = {
 };
 
 const TutorDiscovery = () => {
+  const navigate = useNavigate();
   const [tutors, setTutors] = useState<TutorWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
