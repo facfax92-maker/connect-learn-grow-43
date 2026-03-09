@@ -291,7 +291,7 @@ const StudentDashboard = () => {
     await supabase
       .from("student_profiles")
       .update({
-        grade_level: settingsGrade || null,
+        grade_level: (settingsGrade || null) as any,
         subjects: settingsSubjects,
         learning_goals: settingsGoals || null,
       })
