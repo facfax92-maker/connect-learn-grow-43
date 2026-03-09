@@ -29,6 +29,10 @@ import {
   DollarSign,
   Plus,
   Trash2,
+  UserCheck,
+  Hourglass,
+  Copy,
+  Calculator,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
