@@ -382,7 +382,7 @@ const TutorDiscovery = () => {
 
                       <div className="flex items-center justify-between pt-2 border-t border-border">
                         <span className="text-lg font-bold text-foreground">${tutor.hourly_rate}/hr</span>
-                        <Button size="sm">View Profile</Button>
+                        <Button size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/tutors/${tutor.id}`); }}>View Profile</Button>
                       </div>
                     </CardContent>
                   </Card>

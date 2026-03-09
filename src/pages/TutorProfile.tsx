@@ -175,7 +175,7 @@ const TutorProfile = () => {
   useEffect(() => {
     if (!id) return;
     const weekEnd = addDays(currentWeekStart, 7);
-    (supabase.rpc as (fn: string, args: object) => Promise<{ data: BookedSlot[] | null }>)(
+    (supabase.rpc as unknown as (fn: string, args: object) => Promise<{ data: BookedSlot[] | null }>)(
       "get_tutor_booked_slots",
       {
         p_tutor_id: id,
