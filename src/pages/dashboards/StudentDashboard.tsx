@@ -563,7 +563,7 @@ const StudentDashboard = () => {
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {s.subject} ·{" "}
-                              {format(new Date(s.date), "MMM d")} · रू{s.price?.toLocaleString()}
+                              {format(new Date(s.date), "MMM d")} · रू {s.price?.toLocaleString()}
                             </p>
                             <Badge
                               variant={

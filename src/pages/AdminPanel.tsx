@@ -28,7 +28,7 @@ const TABS = [
   { id: "tutors", label: "Tutors", icon: Users },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "connections", label: "Connections", icon: Link2 },
-  { id: "payments", label: "Payments", icon: CreditCard },
+  { id: "payments", label: "Payments", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "settings", label: "Settings", icon: Settings },
 ];

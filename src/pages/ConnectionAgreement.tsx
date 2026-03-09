@@ -325,25 +325,51 @@ const ConnectionAgreement = () => {
               </div>
 
               <div className="p-4 rounded-lg border-2 border-border space-y-3">
-                <p className="text-sm font-medium text-foreground text-center">Send रू {platformFee.toLocaleString()} to:</p>
+                <p className="text-sm font-medium text-foreground text-center">
+                  Send रू {platformFee.toLocaleString()} to one of these accounts:
+                </p>
 
-                {settings.esewa_number && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[#60BB46]/10 border border-[#60BB46]/30">
-                    <div>
-                      <p className="text-xs text-muted-foreground">eSewa / Khalti</p>
-                      <p className="font-mono font-bold text-foreground">{settings.esewa_number}</p>
-                      <p className="text-xs text-muted-foreground">Name: TutorConnect</p>
+                <div className="grid gap-3">
+                  {settings.esewa_number && (
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border">
+                      <div>
+                        <p className="text-xs text-muted-foreground">eSewa</p>
+                        <p className="font-mono font-bold text-foreground">{settings.esewa_number}</p>
+                        <p className="text-xs text-muted-foreground">Name: {settings.payment_name || "TutorConnect"}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                        onClick={() => copyToClipboard(settings.esewa_number)}
+                      >
+                        <Copy className="h-3 w-3" /> Copy
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1"
-                      onClick={() => copyToClipboard(settings.esewa_number)}
-                    >
-                      <Copy className="h-3 w-3" /> Copy
-                    </Button>
-                  </div>
-                )}
+                  )}
+
+                  {settings.khalti_number && (
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Khalti</p>
+                        <p className="font-mono font-bold text-foreground">{settings.khalti_number}</p>
+                        <p className="text-xs text-muted-foreground">Name: {settings.payment_name || "TutorConnect"}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                        onClick={() => copyToClipboard(settings.khalti_number)}
+                      >
+                        <Copy className="h-3 w-3" /> Copy
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  Please submit your screenshot within 48 hours to avoid expiry.
+                </p>
               </div>
 
               <div className="space-y-3">
