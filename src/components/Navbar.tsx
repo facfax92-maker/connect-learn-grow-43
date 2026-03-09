@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationBell from "@/components/NotificationBell";
 
 const navLinks = [
   { label: "Find Tutors", href: "/tutors" },
@@ -22,7 +23,7 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
               key={link.label}
@@ -33,20 +34,34 @@ const Navbar = () => {
             </Link>
           ))}
           {user ? (
-            <>
+            <div className="flex items-center gap-2">
               <Link
-                to={profile?.role === "tutor" ? "/tutor/dashboard" : "/student/dashboard"}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                to="/messages"
+                className="p-2 rounded-full hover:bg-muted transition-colors"
+              >
+                <MessageCircle className="h-5 w-5 text-muted-foreground" />
+              </Link>
+              <NotificationBell />
+              <Link
+                to={
+                  profile?.role === "tutor"
+                    ? "/tutor/dashboard"
+                    : "/student/dashboard"
+                }
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ml-2"
               >
                 Dashboard
               </Link>
               <Button size="sm" variant="outline" onClick={signOut}>
                 Log Out
               </Button>
-            </>
+            </div>
           ) : (
             <>
-              <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Link
+                to="/login"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
                 Login
               </Link>
               <Link to="/signup">
@@ -57,13 +72,23 @@ const Navbar = () => {
         </div>
 
         {/* Mobile toggle */}
-        <button
-          className="md:hidden p-2 text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center gap-1">
+          {user && (
+            <>
+              <Link to="/messages" className="p-2">
+                <MessageCircle className="h-5 w-5 text-muted-foreground" />
+              </Link>
+              <NotificationBell />
+            </>
+          )}
+          <button
+            className="p-2 text-foreground"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -82,23 +107,48 @@ const Navbar = () => {
           {user ? (
             <>
               <Link
-                to={profile?.role === "tutor" ? "/tutor/dashboard" : "/student/dashboard"}
+                to={
+                  profile?.role === "tutor"
+                    ? "/tutor/dashboard"
+                    : "/student/dashboard"
+                }
                 className="block text-sm font-medium text-muted-foreground hover:text-foreground"
                 onClick={() => setMobileOpen(false)}
               >
                 Dashboard
               </Link>
-              <Button size="sm" variant="outline" className="w-full" onClick={() => { signOut(); setMobileOpen(false); }}>
+              <Link
+                to="/messages"
+                className="block text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => setMobileOpen(false)}
+              >
+                Messages
+              </Link>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  signOut();
+                  setMobileOpen(false);
+                }}
+              >
                 Log Out
               </Button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
+              <Link
+                to="/login"
+                className="block text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => setMobileOpen(false)}
+              >
                 Login
               </Link>
               <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                <Button size="sm" className="w-full">Get Started</Button>
+                <Button size="sm" className="w-full">
+                  Get Started
+                </Button>
               </Link>
             </>
           )}
