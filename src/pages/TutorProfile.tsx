@@ -455,15 +455,45 @@ const TutorProfile = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-medium text-foreground text-sm">{rName}</span>
-                              <span className="text-xs text-muted-foreground shrink-0">
-                                {format(new Date(review.created_at), "MMM d, yyyy")}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground shrink-0">
+                                  {format(new Date(review.created_at), "MMM yyyy")}
+                                </span>
+                                {user && (
+                                  <button
+                                    onClick={async () => {
+                                      await supabase.from("review_flags").insert({
+                                        review_id: review.id,
+                                        flagged_by: user.id,
+                                        reason: "Flagged from profile page",
+                                      } as any);
+                                    }}
+                                    className="p-1 rounded hover:bg-muted transition-colors"
+                                    title="Flag review"
+                                  >
+                                    <Flag className="h-3 w-3 text-muted-foreground" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                             <StarRow rating={review.rating} size="xs" />
+                            {review.tags && review.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5">
+                                {review.tags.map((tag) => (
+                                  <Badge key={tag} variant="secondary" className="text-[10px] py-0">{tag}</Badge>
+                                ))}
+                              </div>
+                            )}
                             {review.comment && (
                               <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                                 {review.comment}
                               </p>
+                            )}
+                            {review.tutor_reply && (
+                              <div className="mt-3 ml-4 p-3 rounded-lg bg-muted/50 border-l-2 border-primary">
+                                <p className="text-xs font-medium text-foreground mb-1">Tutor's Reply</p>
+                                <p className="text-sm text-muted-foreground">{review.tutor_reply}</p>
+                              </div>
                             )}
                           </div>
                         </div>
