@@ -187,7 +187,38 @@ const TutorDashboard = () => {
     setTotalEarnings(completed.reduce((s, b) => s + (b.price || 0), 0));
   };
 
-  const fetchAvailability = async () => {
+  const fetchConnections = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("tutor_student_connections")
+      .select("*")
+      .eq("tutor_user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (data && data.length > 0) {
+      const sids = [...new Set(data.map((c: any) => c.student_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, avatar_url, phone, email")
+        .in("user_id", sids);
+      const pm = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
+
+      const enriched = data.map((c: any) => ({
+        ...c,
+        student_name: pm.get(c.student_id)?.full_name || "Student",
+        student_avatar: pm.get(c.student_id)?.avatar_url,
+        student_phone: pm.get(c.student_id)?.phone,
+        student_email: pm.get(c.student_id)?.email,
+      }));
+
+      setConnectedStudents(enriched.filter((c: any) => c.status === "confirmed"));
+      setPendingConnections(enriched.filter((c: any) => ["pending", "payment_submitted"].includes(c.status)));
+    } else {
+      setConnectedStudents([]);
+      setPendingConnections([]);
+    }
+  };
+
     if (!tutorProfile) return;
     const { data } = await supabase
       .from("tutor_availability")
