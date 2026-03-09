@@ -81,23 +81,9 @@ const TABS = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-const GRADE_LEVELS = [
-  { value: "middle_school", label: "Middle School" },
-  { value: "high_school", label: "High School" },
-  { value: "university", label: "University" },
-  { value: "adult_learner", label: "Adult Learner" },
-];
+import { GRADE_LEVELS, NEPAL_SUBJECTS } from "@/lib/constants";
 
-const ALL_SUBJECTS = [
-  "Math",
-  "Science",
-  "English",
-  "History",
-  "Coding",
-  "Music",
-  "Languages",
-  "Test Prep",
-];
+const ALL_SUBJECTS = NEPAL_SUBJECTS;
 
 const fmtTime = (t: string) => {
   const h = parseInt(t.split(":")[0], 10);
