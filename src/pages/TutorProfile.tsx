@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Star, BadgeCheck, Heart, MapPin,
   ChevronLeft, ChevronRight, MessageCircle,
-  GraduationCap, Video,
+  GraduationCap, Video, Flag,
 } from "lucide-react";
 import {
   format, startOfWeek, addDays, addWeeks, subWeeks,
