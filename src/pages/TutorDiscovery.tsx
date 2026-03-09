@@ -12,9 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Star, Heart, BadgeCheck, Filter, X } from "lucide-react";
+import { NEPAL_SUBJECTS, NEPAL_CITIES, LANGUAGES, PRICE_RANGE, formatNPR } from "@/lib/constants";
 
-const ALL_SUBJECTS = ["Math", "Science", "English", "History", "Coding", "Music", "Languages", "Test Prep"];
-const LANGUAGES = ["English", "Spanish", "French", "Mandarin", "Arabic", "German", "Japanese", "Korean"];
 const AVAILABILITY_OPTIONS = ["Weekdays", "Weekends", "Evenings"];
 const SESSION_TYPE_OPTIONS = ["online", "in_person", "both"] as const;
 
@@ -29,6 +28,7 @@ type TutorWithProfile = {
   review_count: number | null;
   languages: string[] | null;
   availability: string[] | null;
+  teaching_city: string | null;
   status: string;
   profiles: {
     full_name: string | null;
@@ -42,11 +42,12 @@ const TutorDiscovery = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState([10, 200]);
+  const [priceRange, setPriceRange] = useState([PRICE_RANGE.min, PRICE_RANGE.max]);
   const [minRating, setMinRating] = useState("any");
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>([]);
   const [selectedSessionType, setSelectedSessionType] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [sortBy, setSortBy] = useState("top_rated");
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -74,7 +75,6 @@ const TutorDiscovery = () => {
       query = query.eq("session_type", selectedSessionType);
     }
 
-    // Sorting
     switch (sortBy) {
       case "top_rated":
         query = query.order("rating", { ascending: false });
@@ -98,7 +98,6 @@ const TutorDiscovery = () => {
     if (!error && data) {
       let filtered = data as unknown as TutorWithProfile[];
 
-      // Client-side filters for arrays
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         filtered = filtered.filter(
@@ -114,6 +113,9 @@ const TutorDiscovery = () => {
       }
       if (selectedLanguage) {
         filtered = filtered.filter((t) => t.languages?.includes(selectedLanguage));
+      }
+      if (selectedCity) {
+        filtered = filtered.filter((t) => t.teaching_city === selectedCity);
       }
       if (selectedAvailability.length > 0) {
         filtered = filtered.filter((t) =>
@@ -134,16 +136,17 @@ const TutorDiscovery = () => {
 
   useEffect(() => {
     fetchTutors(true);
-  }, [searchQuery, selectedSubjects, priceRange, minRating, selectedAvailability, selectedSessionType, selectedLanguage, sortBy]);
+  }, [searchQuery, selectedSubjects, priceRange, minRating, selectedAvailability, selectedSessionType, selectedLanguage, selectedCity, sortBy]);
 
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedSubjects([]);
-    setPriceRange([10, 200]);
+    setPriceRange([PRICE_RANGE.min, PRICE_RANGE.max]);
     setMinRating("any");
     setSelectedAvailability([]);
     setSelectedSessionType("");
     setSelectedLanguage("");
+    setSelectedCity("");
   };
 
   const toggleSubject = (s: string) => {
@@ -164,7 +167,6 @@ const TutorDiscovery = () => {
 
   const FiltersContent = () => (
     <div className="space-y-6">
-      {/* Search */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Search</label>
         <div className="relative">
@@ -178,11 +180,10 @@ const TutorDiscovery = () => {
         </div>
       </div>
 
-      {/* Subject filter */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Subject</label>
         <div className="flex flex-wrap gap-1.5">
-          {ALL_SUBJECTS.map((s) => (
+          {NEPAL_SUBJECTS.slice(0, 10).map((s) => (
             <Badge
               key={s}
               variant={selectedSubjects.includes(s) ? "default" : "outline"}
@@ -195,19 +196,30 @@ const TutorDiscovery = () => {
         </div>
       </div>
 
-      {/* Price range */}
+      {/* City filter */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Price: ${priceRange[0]} – ${priceRange[1]}/hr</label>
+        <label className="text-sm font-medium">City</label>
+        <Select value={selectedCity} onValueChange={setSelectedCity}>
+          <SelectTrigger><SelectValue placeholder="Any City" /></SelectTrigger>
+          <SelectContent>
+            {NEPAL_CITIES.map((c) => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Rate: {formatNPR(priceRange[0])} – {formatNPR(priceRange[1])}/session</label>
         <Slider
           value={priceRange}
           onValueChange={setPriceRange}
-          min={10}
-          max={200}
-          step={5}
+          min={PRICE_RANGE.min}
+          max={PRICE_RANGE.max}
+          step={100}
         />
       </div>
 
-      {/* Rating filter */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Minimum Rating</label>
         <Select value={minRating} onValueChange={setMinRating}>
@@ -220,7 +232,6 @@ const TutorDiscovery = () => {
         </Select>
       </div>
 
-      {/* Availability */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Availability</label>
         <div className="space-y-2">
@@ -233,7 +244,6 @@ const TutorDiscovery = () => {
         </div>
       </div>
 
-      {/* Session type */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Session Type</label>
         <Select value={selectedSessionType} onValueChange={setSelectedSessionType}>
@@ -246,7 +256,6 @@ const TutorDiscovery = () => {
         </Select>
       </div>
 
-      {/* Language */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Language</label>
         <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
@@ -272,7 +281,7 @@ const TutorDiscovery = () => {
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold text-foreground">Find Your Perfect Tutor</h1>
-            <p className="text-muted-foreground">Browse verified tutors across all subjects</p>
+            <p className="text-muted-foreground">Browse verified tutors across Nepal</p>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -298,14 +307,12 @@ const TutorDiscovery = () => {
         </div>
 
         <div className="flex gap-8">
-          {/* Desktop sidebar filters */}
           <aside className="hidden md:block w-64 shrink-0">
             <div className="sticky top-24 rounded-lg border border-border bg-card p-4">
               <FiltersContent />
             </div>
           </aside>
 
-          {/* Mobile filters overlay */}
           {showMobileFilters && (
             <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
               <div className="fixed inset-y-0 left-0 w-80 bg-card border-r border-border p-6 overflow-y-auto">
@@ -320,7 +327,6 @@ const TutorDiscovery = () => {
             </div>
           )}
 
-          {/* Results grid */}
           <div className="flex-1">
             {tutors.length === 0 && !loading && (
               <div className="text-center py-16">
@@ -359,6 +365,9 @@ const TutorDiscovery = () => {
                               <span>·</span>
                               <span>{tutor.review_count || 0} reviews</span>
                             </div>
+                            {tutor.teaching_city && (
+                              <p className="text-xs text-muted-foreground">{tutor.teaching_city}</p>
+                            )}
                           </div>
                         </div>
                         <button
@@ -381,7 +390,7 @@ const TutorDiscovery = () => {
                       {bioSnippet && <p className="text-sm text-muted-foreground">{bioSnippet}</p>}
 
                       <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <span className="text-lg font-bold text-foreground">${tutor.hourly_rate}/hr</span>
+                        <span className="text-lg font-bold text-foreground">रू {tutor.hourly_rate?.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/session</span></span>
                         <Button size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/tutors/${tutor.id}`); }}>View Profile</Button>
                       </div>
                     </CardContent>
