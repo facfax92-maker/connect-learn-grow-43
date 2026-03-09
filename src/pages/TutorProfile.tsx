@@ -148,6 +148,7 @@ const TutorProfile = () => {
           .from("reviews")
           .select("*", { count: "exact" })
           .eq("tutor_id", id)
+          .eq("flagged", false)
           .order("created_at", { ascending: false })
           .range(0, REVIEWS_PER_PAGE - 1),
       ]);
