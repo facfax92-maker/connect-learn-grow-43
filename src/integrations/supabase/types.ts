@@ -24,7 +24,6 @@ export type Database = {
           price: number
           start_time: string
           status: Database["public"]["Enums"]["booking_status"]
-          stripe_payment_id: string | null
           student_id: string
           subject: string
           tutor_id: string
@@ -39,7 +38,6 @@ export type Database = {
           price: number
           start_time: string
           status?: Database["public"]["Enums"]["booking_status"]
-          stripe_payment_id?: string | null
           student_id: string
           subject: string
           tutor_id: string
@@ -54,7 +52,6 @@ export type Database = {
           price?: number
           start_time?: string
           status?: Database["public"]["Enums"]["booking_status"]
-          stripe_payment_id?: string | null
           student_id?: string
           subject?: string
           tutor_id?: string
