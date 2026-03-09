@@ -202,6 +202,7 @@ const TutorProfile = () => {
       .from("reviews")
       .select("*")
       .eq("tutor_id", id)
+      .eq("flagged", false)
       .order("created_at", { ascending: false })
       .range(reviewsOffset, reviewsOffset + REVIEWS_PER_PAGE - 1);
     if (reviewData && reviewData.length > 0) {
