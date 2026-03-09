@@ -521,8 +521,8 @@ const TutorProfile = () => {
                   {/* Rate & save */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-3xl font-bold text-foreground">${tutor.hourly_rate}</span>
-                      <span className="text-muted-foreground text-sm">/hr</span>
+                      <span className="text-3xl font-bold text-foreground">रू {tutor.hourly_rate?.toLocaleString()}</span>
+                      <span className="text-muted-foreground text-sm">/session</span>
                     </div>
                     <button
                       onClick={() => setSaved((s) => !s)}
