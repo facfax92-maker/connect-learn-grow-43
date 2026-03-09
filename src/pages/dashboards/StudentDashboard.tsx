@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,7 +40,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-
+import ReviewModal from "@/components/ReviewModal";
 type Booking = {
   id: string;
   tutor_id: string;
@@ -151,10 +151,26 @@ const StudentDashboard = () => {
   const [settingsGoals, setSettingsGoals] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [saving, setSaving] = useState(false);
-
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+  const [reviewedBookingIds, setReviewedBookingIds] = useState<Set<string>>(new Set());
   useEffect(() => {
     setSavedIds(JSON.parse(localStorage.getItem("savedTutors") || "[]"));
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    // Fetch which bookings already have reviews
+    const fetchReviewedIds = async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("booking_id")
+        .eq("student_id", user.id);
+      if (data) {
+        setReviewedBookingIds(new Set(data.map((r: any) => r.booking_id).filter(Boolean)));
+      }
+    };
+    fetchReviewedIds();
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -575,13 +591,26 @@ const StudentDashboard = () => {
                               {s.status}
                             </Badge>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/tutors/${s.tutor_id}`)}
-                          >
-                            Book Again
-                          </Button>
+                          <div className="flex gap-2 shrink-0">
+                            {s.status === "completed" && !reviewedBookingIds.has(s.id) && (
+                              <Button
+                                size="sm"
+                                onClick={() => setReviewBooking(s)}
+                              >
+                                <Star className="h-3 w-3 mr-1" /> Leave Review
+                              </Button>
+                            )}
+                            {s.status === "completed" && reviewedBookingIds.has(s.id) && (
+                              <Badge variant="secondary" className="text-xs">Reviewed ✓</Badge>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/tutors/${s.tutor_id}`)}
+                            >
+                              Book Again
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))
@@ -923,6 +952,22 @@ const StudentDashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Review Modal */}
+      {reviewBooking && (
+        <ReviewModal
+          open={!!reviewBooking}
+          onClose={() => setReviewBooking(null)}
+          bookingId={reviewBooking.id}
+          tutorId={reviewBooking.tutor_id}
+          tutorName={reviewBooking.tutor_name || "Tutor"}
+          tutorAvatar={reviewBooking.tutor_avatar}
+          onSubmitted={() => {
+            setReviewedBookingIds((prev) => new Set([...prev, reviewBooking.id]));
+            fetchReviews();
+          }}
+        />
+      )}
     </div>
   );
 };
