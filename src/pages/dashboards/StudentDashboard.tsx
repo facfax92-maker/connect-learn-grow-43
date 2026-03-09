@@ -150,7 +150,7 @@ const StudentDashboard = () => {
   const [settingsSubjects, setSettingsSubjects] = useState<string[]>([]);
   const [settingsGoals, setSettingsGoals] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [saving, setSaving] = false ? useState(false) : useState(false);
+  const [saving, setSaving] = useState(false);
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
   const [reviewedBookingIds, setReviewedBookingIds] = useState<Set<string>>(new Set());
   useEffect(() => {
