@@ -498,6 +498,7 @@ export type Database = {
         Args: { p_student_id: string; p_tutor_id: string }
         Returns: string
       }
+      get_subject_categories: { Args: never; Returns: string[] }
       get_tutor_booked_slots: {
         Args: { p_date_end: string; p_date_start: string; p_tutor_id: string }
         Returns: {
@@ -534,7 +535,7 @@ export type Database = {
         | "masters"
         | "entrance_exam_prep"
       session_type: "online" | "in_person" | "both"
-      tutor_status: "pending_approval" | "approved" | "rejected"
+      tutor_status: "pending_approval" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -684,7 +685,7 @@ export const Constants = {
         "entrance_exam_prep",
       ],
       session_type: ["online", "in_person", "both"],
-      tutor_status: ["pending_approval", "approved", "rejected"],
+      tutor_status: ["pending_approval", "approved", "rejected", "suspended"],
     },
   },
 } as const
