@@ -17,7 +17,6 @@ const AdminSettingsTab = ({ invokeAdmin }: Props) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newCity, setNewCity] = useState("");
-  const [newSubject, setNewSubject] = useState("");
 
   useEffect(() => {
     const fetch = async () => {
@@ -48,7 +47,6 @@ const AdminSettingsTab = ({ invokeAdmin }: Props) => {
   };
 
   const cities = (settings.cities_served || "").split(",").filter(Boolean);
-  const subjects = (settings.subjects_offered || "").split(",").filter(Boolean);
 
   const addCity = () => {
     if (!newCity.trim()) return;
@@ -60,15 +58,6 @@ const AdminSettingsTab = ({ invokeAdmin }: Props) => {
     update("cities_served", cities.filter((c) => c !== city).join(","));
   };
 
-  const addSubject = () => {
-    if (!newSubject.trim()) return;
-    const updated = [...subjects, newSubject.trim()].join(",");
-    update("subjects_offered", updated);
-    setNewSubject("");
-  };
-  const removeSubject = (sub: string) => {
-    update("subjects_offered", subjects.filter((s) => s !== sub).join(","));
-  };
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
@@ -169,27 +158,6 @@ const AdminSettingsTab = ({ invokeAdmin }: Props) => {
             <div className="flex gap-2">
               <Input placeholder="Add city..." value={newCity} onChange={(e) => setNewCity(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCity()} className="flex-1" />
               <Button size="sm" variant="outline" onClick={addCity}><Plus className="h-4 w-4" /></Button>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Subjects */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Subjects Offered</label>
-            <div className="flex flex-wrap gap-1">
-              {subjects.map((s) => (
-                <Badge key={s} variant="secondary" className="gap-1 pr-1">
-                  {s}
-                  <button onClick={() => removeSubject(s)} className="hover:bg-muted rounded-full p-0.5">
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Input placeholder="Add subject..." value={newSubject} onChange={(e) => setNewSubject(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addSubject()} className="flex-1" />
-              <Button size="sm" variant="outline" onClick={addSubject}><Plus className="h-4 w-4" /></Button>
             </div>
           </div>
 

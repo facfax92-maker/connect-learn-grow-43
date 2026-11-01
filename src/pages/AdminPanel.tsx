@@ -14,6 +14,7 @@ import {
   Wallet,
   Star,
   Settings,
+  BookOpen,
 } from "lucide-react";
 import AdminDashboardTab from "@/components/admin/AdminDashboardTab";
 import AdminTutorsTab from "@/components/admin/AdminTutorsTab";
@@ -22,10 +23,12 @@ import AdminConnectionsTab from "@/components/admin/AdminConnectionsTab";
 import AdminPaymentsTab from "@/components/admin/AdminPaymentsTab";
 import AdminReviewsTab from "@/components/admin/AdminReviewsTab";
 import AdminSettingsTab from "@/components/admin/AdminSettingsTab";
+import AdminSubjectsTab from "@/components/admin/AdminSubjectsTab";
 
 const TABS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "tutors", label: "Tutors", icon: Users },
+  { id: "subjects", label: "Subjects", icon: BookOpen },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "connections", label: "Connections", icon: Link2 },
   { id: "payments", label: "Payments", icon: Wallet },
@@ -66,7 +69,12 @@ const AdminPanel = () => {
     const { data, error } = await supabase.functions.invoke("admin-panel", {
       body: { action, ...params },
     });
-    if (error) throw error;
+    if (error) {
+      const context = (error as { context?: Response }).context;
+      const details = context ? await context.json().catch(() => null) : null;
+      throw new Error(details?.error || error.message);
+    }
+    if (data?.error) throw new Error(data.error);
     return data;
   }, []);
 
@@ -94,16 +102,17 @@ const AdminPanel = () => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
             return (
-              <button
+              <Button
+                variant="ghost"
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`justify-start h-auto flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
-              </button>
+              </Button>
             );
           })}
         </aside>
@@ -115,25 +124,27 @@ const AdminPanel = () => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
               return (
-                <button
+                <Button
+                  variant="ghost"
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 min-w-[4rem] flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
+                  className={`h-auto rounded-none flex-1 min-w-[4rem] flex flex-col items-center gap-0.5 px-2 py-2 text-[10px] font-medium transition-colors ${
                     active ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
                   {tab.label}
-                </button>
+                </Button>
               );
             })}
           </div>
         </div>
 
         {/* Main */}
-        <main className="flex-1 p-6 pb-24 md:pb-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
+        <main className="min-w-0 flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
           {activeTab === "dashboard" && <AdminDashboardTab invokeAdmin={invokeAdmin} />}
           {activeTab === "tutors" && <AdminTutorsTab invokeAdmin={invokeAdmin} />}
+          {activeTab === "subjects" && <AdminSubjectsTab invokeAdmin={invokeAdmin} />}
           {activeTab === "students" && <AdminStudentsTab invokeAdmin={invokeAdmin} />}
           {activeTab === "connections" && <AdminConnectionsTab invokeAdmin={invokeAdmin} />}
           {activeTab === "payments" && <AdminPaymentsTab invokeAdmin={invokeAdmin} />}

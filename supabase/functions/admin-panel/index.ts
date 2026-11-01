@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { normalizeSubjectCategories, TUTOR_STATUSES } from "../../../src/lib/admin-rules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,14 +8,15 @@ const corsHeaders = {
 };
 
 async function verifyAdmin(req: Request) {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!supabaseUrl || !serviceKey || !anonKey) throw new Error("Server configuration unavailable");
   const supabase = createClient(supabaseUrl, serviceKey);
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) throw new Error("Unauthorized");
 
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   });
@@ -60,7 +62,7 @@ Deno.serve(async (req) => {
         supabase.from("tutor_student_connections").select("status, platform_fee, created_at, confirmed_at"),
         supabase.from("reviews").select("rating"),
         supabase.from("tutor_profiles").select("id").eq("status", "pending_approval"),
-        supabase.from("reviews").select("id").eq("flagged", true),
+        supabase.from("review_flags").select("review_id, reviews!inner(flagged)").eq("reviews.flagged", false),
       ]);
 
       const confirmed = (allConns || []).filter((c: any) => c.status === "confirmed");
@@ -79,16 +81,17 @@ Deno.serve(async (req) => {
         avg_rating: Math.round(avgRating * 10) / 10,
         revenue_all_time: confirmed.reduce((s: number, c: any) => s + Number(c.platform_fee), 0),
         pending_tutors: (pendingTutors || []).length,
-        flagged_reviews: (flaggedReviews || []).length,
+        flagged_reviews: new Set((flaggedReviews || []).map((report: any) => report.review_id)).size,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // ── LIST TUTORS ──
     if (action === "list_tutors") {
-      const { data: tutors } = await supabase
+      const { data: tutors, error } = await supabase
         .from("tutor_profiles")
         .select("*")
         .order("created_at", { ascending: false });
+      if (error) throw error;
 
       if (tutors && tutors.length > 0) {
         const uids = tutors.map((t: any) => t.user_id);
@@ -117,6 +120,7 @@ Deno.serve(async (req) => {
     // ── UPDATE TUTOR STATUS ──
     if (action === "update_tutor_status") {
       const { tutor_id, status, reason } = params;
+      if (!TUTOR_STATUSES.includes(status)) throw new Error("Invalid tutor status");
       const { error } = await supabase
         .from("tutor_profiles")
         .update({ status })
@@ -293,10 +297,11 @@ Deno.serve(async (req) => {
 
     // ── LIST REVIEWS ──
     if (action === "list_reviews") {
-      const { data: reviews } = await supabase
+      const { data: reviews, error } = await supabase
         .from("reviews")
         .select("*")
         .order("created_at", { ascending: false });
+      if (error) throw error;
 
       if (reviews && reviews.length > 0) {
         const allIds = [...new Set([
@@ -328,8 +333,9 @@ Deno.serve(async (req) => {
           .select("review_id, reason, flagged_by, created_at");
         const flagMap = new Map<string, any[]>();
         (flags || []).forEach((f: any) => {
-          if (!flagMap.has(f.review_id)) flagMap.set(f.review_id, []);
-          flagMap.get(f.review_id)!.push(f);
+          const reports = flagMap.get(f.review_id) || [];
+          reports.push(f);
+          flagMap.set(f.review_id, reports);
         });
 
         const enriched = reviews.map((r: any) => ({
@@ -350,24 +356,40 @@ Deno.serve(async (req) => {
     // ── MODERATE REVIEW ──
     if (action === "moderate_review") {
       const { review_id, flagged } = params;
+      if (typeof flagged !== "boolean" || typeof review_id !== "string") throw new Error("Invalid moderation request");
       const { error } = await supabase
         .from("reviews")
         .update({ flagged })
         .eq("id", review_id);
       if (error) throw error;
+      if (!flagged) {
+        const { error: reportError } = await supabase.from("review_flags").delete().eq("review_id", review_id);
+        if (reportError) throw reportError;
+      }
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (action === "save_subject_categories") {
+      const categories = normalizeSubjectCategories(params.categories);
+      const { error } = await supabase.from("platform_settings").upsert({
+        key: "subjects_offered", value: JSON.stringify(categories), updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // ── UPDATE SETTINGS ──
     if (action === "update_settings") {
       const { settings } = params;
       for (const [key, value] of Object.entries(settings)) {
-        await supabase
+        if (key === "subjects_offered") continue;
+        const { error } = await supabase
           .from("platform_settings")
           .update({ value: String(value), updated_at: new Date().toISOString() })
           .eq("key", key);
+        if (error) throw error;
       }
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

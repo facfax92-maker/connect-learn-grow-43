@@ -1,0 +1,4 @@
+# Architecture rules
+- Admin management actions run through the admin-panel edge function, which verifies the authenticated user's protected user_roles entry; database triggers prevent owners from changing tutor approval or review moderation status.
+- Subject categories use the existing platform_settings catalog, encoded as a JSON array; a narrowly scoped public function exposes only that catalog to search, preserving names containing commas.
+- Shared admin validation and review-queue classification live in src/lib/admin-rules.ts so browser controls and administrative actions follow the same rules.
