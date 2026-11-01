@@ -37,7 +37,9 @@ const AdminTutorsTab = ({ invokeAdmin }: Props) => {
     try {
       const data = await invokeAdmin("list_tutors");
       setTutors(data || []);
-    } catch {}
+    } catch (err) {
+      toast({ title: "Unable to load tutors", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
+    }
     setLoading(false);
   };
 
@@ -99,7 +101,7 @@ const AdminTutorsTab = ({ invokeAdmin }: Props) => {
           <Card><CardContent className="py-12 text-center text-muted-foreground">No tutors found</CardContent></Card>
         ) : (
           filtered.map((t) => (
-            <Card key={t.id} className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setSelectedTutor(t)}>
+            <Card key={t.id} className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => { setChecklist({ id: false, profile: false, payment: false, flags: false }); setSelectedTutor(t); }}>
               <CardContent className="p-4 flex items-center gap-4 flex-wrap">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={t.avatar_url || undefined} />
@@ -232,13 +234,13 @@ const AdminTutorsTab = ({ invokeAdmin }: Props) => {
                     <Pause className="h-4 w-4" /> Suspend
                   </Button>
                 )}
-                {selectedTutor.status === "suspended" && (
+                {(selectedTutor.status === "suspended" || selectedTutor.status === "rejected") && (
                   <Button
                     className="gap-1"
                     onClick={() => updateStatus(selectedTutor.id, "pending_approval")}
                     disabled={processing}
                   >
-                    <Play className="h-4 w-4" /> Unsuspend
+                    <Play className="h-4 w-4" /> Return to review
                   </Button>
                 )}
               </DialogFooter>

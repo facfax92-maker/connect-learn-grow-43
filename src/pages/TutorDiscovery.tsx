@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Star, Heart, BadgeCheck, Filter, X } from "lucide-react";
 import { NEPAL_SUBJECTS, NEPAL_CITIES, LANGUAGES, PRICE_RANGE, formatNPR } from "@/lib/constants";
+import { useSubjectCategories } from "@/hooks/use-subject-categories";
 
 const AVAILABILITY_OPTIONS = ["Weekdays", "Weekends", "Evenings"];
 const SESSION_TYPE_OPTIONS = ["online", "in_person", "both"] as const;
@@ -37,6 +38,7 @@ type TutorWithProfile = {
 };
 
 const TutorDiscovery = () => {
+  const { data: subjectCategories = NEPAL_SUBJECTS } = useSubjectCategories();
   const navigate = useNavigate();
   const [tutors, setTutors] = useState<TutorWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,7 +185,7 @@ const TutorDiscovery = () => {
       <div className="space-y-2">
         <label className="text-sm font-medium">Subject</label>
         <div className="flex flex-wrap gap-1.5">
-          {NEPAL_SUBJECTS.slice(0, 10).map((s) => (
+          {subjectCategories.map((s) => (
             <Badge
               key={s}
               variant={selectedSubjects.includes(s) ? "default" : "outline"}

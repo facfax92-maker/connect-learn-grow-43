@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Star, Flag, Trash2, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { partitionReviews } from "@/lib/admin-rules";
 
 type Props = { invokeAdmin: (action: string, params?: any) => Promise<any> };
 
@@ -22,7 +23,9 @@ const AdminReviewsTab = ({ invokeAdmin }: Props) => {
     try {
       const data = await invokeAdmin("list_reviews");
       setReviews(data || []);
-    } catch {}
+    } catch (err) {
+      toast({ title: "Unable to load reviews", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
+    }
     setLoading(false);
   };
 
@@ -38,8 +41,7 @@ const AdminReviewsTab = ({ invokeAdmin }: Props) => {
     setProcessing(false);
   };
 
-  const flagged = reviews.filter((r) => r.flagged || (r.flags && r.flags.length > 0));
-  const published = reviews.filter((r) => !r.flagged);
+  const { reported: flagged, published, removed } = partitionReviews(reviews);
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
@@ -65,7 +67,7 @@ const AdminReviewsTab = ({ invokeAdmin }: Props) => {
               )}
             </div>
             {review.comment && (
-              <p className="text-sm text-muted-foreground line-clamp-2">{review.comment}</p>
+              <p className="text-sm text-muted-foreground break-words">{review.comment}</p>
             )}
             {review.tags?.length > 0 && (
               <div className="flex flex-wrap gap-1">
@@ -74,7 +76,7 @@ const AdminReviewsTab = ({ invokeAdmin }: Props) => {
             )}
             {review.flags?.length > 0 && (
               <div className="text-xs text-destructive mt-1">
-                Flag reason: {review.flags[0].reason}
+                {review.flags.map((report: any, index: number) => <p key={index} className="break-words">Report {index + 1}: {report.reason}</p>)}
               </div>
             )}
             <p className="text-xs text-muted-foreground">{format(new Date(review.created_at), "MMM d, yyyy")}</p>
@@ -105,13 +107,14 @@ const AdminReviewsTab = ({ invokeAdmin }: Props) => {
     <div className="max-w-6xl space-y-4">
       <h1 className="font-display text-2xl font-bold text-foreground">Reviews</h1>
 
-      <Tabs defaultValue="all">
-        <TabsList>
+      <Tabs defaultValue="flagged">
+        <TabsList className="max-w-full">
           <TabsTrigger value="all">All ({published.length})</TabsTrigger>
           <TabsTrigger value="flagged">
-            Flagged ({flagged.length})
+            Reported ({flagged.length})
             {flagged.length > 0 && <span className="ml-1 inline-block w-2 h-2 bg-destructive rounded-full" />}
           </TabsTrigger>
+          <TabsTrigger value="removed">Removed ({removed.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-2 mt-4">
@@ -124,6 +127,9 @@ const AdminReviewsTab = ({ invokeAdmin }: Props) => {
           {flagged.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No flagged reviews</CardContent></Card>
           ) : flagged.map((r) => <ReviewRow key={r.id} review={r} />)}
+        </TabsContent>
+        <TabsContent value="removed" className="space-y-2 mt-4">
+          {removed.length === 0 ? <p className="py-12 text-center text-muted-foreground">No removed reviews</p> : removed.map((r) => <ReviewRow key={r.id} review={r} />)}
         </TabsContent>
       </Tabs>
     </div>
