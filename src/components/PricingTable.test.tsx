@@ -17,6 +17,7 @@ describe("PricingTable theme toggle", () => {
 
     const toggle = screen.getByRole("button", { name: "Switch to dark mode" });
     expect(toggle).toHaveClass("pricing-theme");
+    expect(toggle.parentElement).toHaveClass("pricing-board");
     expect(toggle).toHaveAttribute("aria-pressed", "false");
     expect(document.getElementById("pricing")).not.toHaveClass("dark");
 

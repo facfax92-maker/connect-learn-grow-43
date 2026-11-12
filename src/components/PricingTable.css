@@ -56,11 +56,15 @@
   box-shadow: 0 1px 2px hsl(222 47% 11% / 0.12);
 }
 
+.pricing-board {
+  position: relative;
+}
+
 .pricing-theme {
   position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 4;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 5;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -448,13 +452,9 @@
 }
 
 @media (max-width: 719px) {
-  .pricing-theme {
-    top: 0.85rem;
-    right: 0.85rem;
-  }
-
   .pricing-card.is-featured {
     order: -1;
+    padding-top: 3.6rem;
   }
 
   .pricing-amount {
@@ -473,6 +473,10 @@
     padding: 1rem;
   }
 
+  .pricing-card:last-child {
+    padding-top: 3.6rem;
+  }
+
   .pricing-amount {
     font-size: 1.7rem;
   }
@@ -484,6 +488,10 @@
 }
 
 @media (min-width: 1024px) {
+  .pricing-table thead th {
+    padding-top: 3.5rem;
+  }
+
   .pricing-compare {
     display: block;
   }

@@ -93,15 +93,6 @@ const PricingTable = () => {
 
   return (
     <section id="pricing" className={dark ? "pricing dark" : "pricing"} aria-labelledby="pricing-heading">
-      <button
-        type="button"
-        className="pricing-theme"
-        aria-pressed={dark}
-        aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-        onClick={() => setDark((on) => !on)}
-      >
-        {dark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
-      </button>
       <div className="container px-4">
         <h2 id="pricing-heading" className="pricing-heading">
           Pricing
@@ -124,6 +115,16 @@ const PricingTable = () => {
           {mode === "month" ? "Showing monthly example prices" : "Showing per-session example prices"}
         </p>
 
+        <div className="pricing-board">
+          <button
+            type="button"
+            className="pricing-theme"
+            aria-pressed={dark}
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+            onClick={() => setDark((on) => !on)}
+          >
+            {dark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+          </button>
         <div className="pricing-compare">
           <table className="pricing-table">
             <caption className="pricing-sr">
@@ -204,6 +205,7 @@ const PricingTable = () => {
               </Link>
             </article>
           ))}
+        </div>
         </div>
 
         <p className="pricing-note">
