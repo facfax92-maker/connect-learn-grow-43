@@ -7,6 +7,7 @@ import NotificationBell from "@/components/NotificationBell";
 
 const navLinks = [
   { label: "Find Tutors", href: "/tutors" },
+  { label: "Pricing", href: "/#pricing" },
   { label: "Become a Tutor", href: "/signup?intent=tutor" },
   { label: "How It Works", href: "/#how-it-works" },
 ];
